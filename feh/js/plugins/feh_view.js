@@ -1,4 +1,7 @@
 
+//------------------------------------------------------------------
+// グローバルデータ
+
 
 /**
  * テストモード
@@ -85,19 +88,21 @@ function fehInit() {
  * @returns
  */
 function clickAction() {
+	
+	// デバッグログ
+	console.dir("■start clickAction");
+	console.dir("■gamenStatus, gamen, x, y");
+	console.dir(g_gamenStatus);
+	console.dir(g_gamen);
+	console.dir(x);
+	console.dir(y);
 
 	// クリックしたマスを特定する
 	var x = $gameMap.canvasToMapX(TouchInput.x);
 	var y = $gameMap.canvasToMapY(TouchInput.y);
 	
 	// クリックした対象を取得する
-	var clickTarget = getClickTarget(x, y)
-	
-	// デバッグログ
-	console.dir("x, y, g_gamen");
-	console.dir(x);
-	console.dir(y);
-	console.dir(g_gamen);
+	var clickTarget = getClickTarget(x, y);
 	
 	// バトルスタート前の場合、選択画面の処理を行う
 	if (!g_startBattleFlg) {
@@ -106,8 +111,13 @@ function clickAction() {
 	// バトルスタート後の場合、バトル画面の処理を行う
 	} else {
 		g_viewBattle.excute(x, y, clickTarget);
-		
 	}
+	
+	// デバッグログ
+	console.dir("■end clickAction");
+	console.dir("■gamenStatus, gamen");
+	console.dir(g_gamenStatus);
+	console.dir(g_gamen);
 }
 
 /**
@@ -162,11 +172,10 @@ function clearGamen() {
  * 指定したマスの状態を取得します
  */
 function getClickTarget(x, y) {
-	var target = g_gamen[x][y];
-	if (target == undefined) {
+	if (g_gamen[x] == undefined) {
 		return undefined;
 	}
-	return target.category;
+	return g_gamen[x][y];
 };
 
 /**

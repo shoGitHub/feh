@@ -4,7 +4,7 @@
  * @returns
  */
 function testFunction() {
-	var battle = setBattleData();
+	var battle = getBattleData();
 	console.dir(battle);
 }
 
@@ -105,16 +105,71 @@ feh_battleLogic.prototype.serch = function(moveMap, move, x, y) {
 	return (moveMap[x][y] > 0);
 }
 
+/**
+ * 攻撃可能マップを取得します
+ */
+feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
+
+	// 攻撃可能マップ初期化
+	// ※x,yが反転することに注意
+	var attackMap = [
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+	];
+	
+	// 攻撃マップを作成
+	for (i=0; i<6; i++) {
+		for (j=0; j<8; j++) {
+			if (moveMap[i][j] >= 0) {
+				
+				// 遠近によって条件分け（未実装）
+				if (this.isMap(i+1, j)) {
+					attackMap[i+1][j] = true; 
+				}
+				if (this.isMap(i, j+1)) {
+					attackMap[i][j+1] = true; 
+				}
+				if (this.isMap(i-1, j)) {
+					attackMap[i-1][j] = true; 
+				}
+				if (this.isMap(i, j-1)) {
+					attackMap[i][j-1] = true; 
+				}
+			}
+		}
+	}
+	
+	// デバッグログ
+	console.dir("■attackMap");
+	console.dir(attackMap);
+	
+	// 攻撃マップを返却
+	return attackMap;
+}
+
+/**
+ * 指定したマスがマップをはみ出ていないか判定します
+ * 
+ */
+feh_battleLogic.prototype.isMap = function(x, y) {
+	if (x < 0 || 5 < x
+			|| y < 0 || 7 < y) {
+		return false;
+	}
+	return true;
+}
 
 /**
  * バトルデータを設定する
  * @returns
  */
-feh_battleLogic.prototype.setBattleData = function() {
+feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 
 	var battle = new battleData();
-	var kougekisha = g_sentoshaData[0];
-	var hangekisha = g_sentoshaData[4];
 
 	// 攻撃者、反撃者の設定
 	battle.kougekisha = kougekisha;
@@ -152,6 +207,10 @@ feh_battleLogic.prototype.setBattleData = function() {
 		}
 	}
 	
+	// デバッグログ
+	console.dir("■battle");
+	console.dir(battle);
+	
 	return battle;
 }
 
@@ -168,6 +227,7 @@ feh_battleLogic.prototype.setKougekiData =
 	var kougeki = new kougekiData();
 
 	kougeki.kougekisha = kougekisha;	// 攻撃者
+	kougeki.shubisha = shubisha;	// 攻撃者
 	kougeki.damage = this.culcDamage(kougekisha, shubisha);	// ダメージ
 	kougeki.kougekishaOugiHendou = -1;						// 攻撃者奥義変動値
 	kougeki.shubishaoOgiHendou = -1;						// 守備者奥義変動値
@@ -217,11 +277,11 @@ feh_battleLogic.prototype.setKougekiJun = function(kougekisha, hangekisha) {
  * @returns
  */
 feh_battleLogic.prototype.culcDamage = function(kougekisha, shubisha) {
-	
+
 	var damage = 0;
 
 	// ダメージタイプ考慮
-	if (bukiType[kougekisha.bukiType].damageType == "butsuri") {
+	if (g_bukiTypeData[kougekisha.bukiType].damageType == "butsuri") {
 		damage = kougekisha.kougeki - shubisha.shubi;
 	} else {
 		damage = kougekisha.kougeki - shubisha.mabou;
@@ -242,7 +302,7 @@ feh_battleLogic.prototype.culcDamage = function(kougekisha, shubisha) {
  * @returns
  */
 feh_battleLogic.prototype.canHangeki = function(kougekisha, hangekisha) {
-	if (bukiType[kougekisha.bukiType].range == bukiType[hangekisha.bukiType].range) {
+	if (g_bukiTypeData[kougekisha.bukiType].range == g_bukiTypeData[hangekisha.bukiType].range) {
 		return true;
 	} else {
 		return false;
