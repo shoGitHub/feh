@@ -185,6 +185,7 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 	battle.kougekiDataArray = [];
 	battle.kougekishaShibouFlg = false;
 	battle.hangekishaShibouFlg = false;
+	var isEnd = false;
 	for (i = 0; i < battle.kougekiJunArray.length; i++) {
 		
 		var kougeki;
@@ -193,7 +194,8 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 			battle.kougekiDataArray.push(kougeki);
 
 			// 死亡した場合、バトル終了
-			if (kougeki.shubishaShibouFlg) {
+			if (kougeki.shubishaShibouFlg && !isEnd) {
+				isEnd = true;
 				battle.hangekishaShibouFlg = true;
 			}
 		} else {
@@ -201,17 +203,41 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 			battle.kougekiDataArray.push(kougeki);
 
 			// 死亡した場合、バトル終了
-			if (kougeki.shubishaShibouFlg) {
+			if (kougeki.shubishaShibouFlg && !isEnd) {
+				isEnd = true;
 				battle.kougekishaShibouFlg = true;
 			}
 		}
 	}
 	
 	// デバッグログ
-	console.dir("■battle");
+	console.dir("■attackData");
 	console.dir(battle);
 	
 	return battle;
+}
+
+/**
+ * 攻撃を実行します
+ * viewクラスから呼び出される処理
+ */
+feh_battleLogic.prototype.excuteAttack = function(attackData) {
+
+	// ダメージを反映する
+	var attackDataArray = attackData.kougekiDataArray;
+	for (i=0; i<attackDataArray.length; i++) {
+		
+		// ダメージ計算する
+		attackDataArray[i].shubisha.nokoriHp -= attackDataArray[i].damage;
+		if (attackDataArray[i].shubisha.nokoriHp < 0) {
+			attackDataArray[i].shubisha.nokoriHp = 0;
+		}
+
+		// 守備者が死亡した場合、終了
+		if (attackDataArray[i].shubishaShibouFlg) {
+			return ;
+		}	
+	}	
 }
 
 /**
@@ -233,7 +259,7 @@ feh_battleLogic.prototype.setKougekiData =
 	kougeki.shubishaoOgiHendou = -1;						// 守備者奥義変動値
 	kougeki.kougekishaOugiFlg = false;				// 攻撃者奥義有無
 	kougeki.shubishaOugiFlg = false;					// 守備者奥義有無
-	if (shubisha.nokoriHp < kougeki.damage) {			// 守備者死亡判定
+	if (kougeki.shubisha.nokoriHp <= kougeki.damage) {			// 守備者死亡判定
 		kougeki.shubishaShibouFlg = true;
 	} else {
 		kougeki.shubishaShibouFlg = false;
