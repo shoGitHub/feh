@@ -177,7 +177,7 @@ feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 	} else if (g_gamenStatus == "selected") {
 		
 		// 自マスをクリックした場合、キャラクターを待機状態にする
-		if (clickTarget == "selectedCharactor") {
+		if (clickTarget == "movedCharactor") {
 			this.excute3(x, y);
 		}
 		
@@ -447,9 +447,6 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 	
 	// キャラクターを選択色にする
 	$gameScreen.tintPicture(this._charactor[x][y].imgNo, [-60, -60, 60, 60], 10);
-
-	// キャラクター画面情報を更新する
-	g_gamen[x][y] = "selectedCharactor";
 	
 	// キャラクターの移動範囲を表示する
 	var moveMap = this._battleLogic.getMoveMap(x, y);
@@ -487,21 +484,21 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 			}
 		}
 	}
+
+	// 選択したキャラのステータスを表示する
+	this.viewStatus(x, y);
+	
+	// キャラクター画面情報を更新する
+	g_gamen[x][y] = "movedCharactor";
 	
 	// 選択キャラクターの移動マス情報を保存する
 	this._beforeMoveX = x;
 	this._beforeMoveY = y;
 	this._afterMoveX = x;
 	this._afterMoveY = y;
-
-	// 画面情報を更新する
-	g_gamen[this._afterMoveX][this._afterMoveY] = "movedCharactor";
 	
 	// 選択キャラクター情報を保存する
 	this._battle.selectedCharactor = this._charactor[x][y];
-
-	// 選択したキャラのステータスを表示する
-	this.viewStatus(x, y);
 };
 
 
@@ -517,6 +514,7 @@ feh_viewBattle.prototype.moveCharactor = function(x, y) {
 
 	// 移動キャラクター情報を画面情報に設定する
 	g_gamen[this._afterMoveX][this._afterMoveY] = "moveMap";
+	g_gamen[x][y] = "movedCharactor";
 	
 	// キャラクター移動前、移動後のマスを保存する
 	this._afterMoveX = x;
