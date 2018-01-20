@@ -170,14 +170,14 @@ feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 		
 		// 敵キャラか行動済みキャラをクリックした場合の処理
 		if (clickTarget == "enemyCharactor" || clickTarget == "decideCharactor") {
-			this.excute6(x, y);
+			this.excute11(x, y);
 		}
 		
 	// 移動可能キャラ選択状態の場合
 	} else if (g_gamenStatus == "selected") {
 		
 		// 自マスをクリックした場合、キャラクターを待機状態にする
-		if (clickTarget == "movedCharactor") {
+		if (clickTarget == "moveCharactor") {
 			this.excute3(x, y);
 		}
 		
@@ -214,7 +214,7 @@ feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 		}
 		
 		// 同じ移動先をクリックした場合、移動先決定
-		if (clickTarget == "movedCharactor") {
+		if (clickTarget == "moveCharactor") {
 			this.excute3(x, y);
 		}
 		
@@ -245,29 +245,32 @@ feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 			this.excute5(x, y);
 		}
 		
-//		// 同じ移動先をクリックした場合、移動先決定
-//		if (clickTarget == "movedCharactor") {
-//			this.excute3(x, y);
-//		}
-//		
-//		// 攻撃対象をクリックした場合
-//		if (clickTarget == "canAttackEnemy") {
-//			this.excute8(x, y);
-//		}
-//		
-//		// 補助対象をクリックした場合
-//
-//		// その他キャラクターをクリックした場合の処理
-//		if (clickTarget == "charactor" 
-//			|| clickTarget == "enemyCharactor"
-//			|| clickTarget == "decideCharactor") {
-//			this.excute6(x, y);
-//		}
-//
-//		// 関係ないマスをクリックした場合、行動をキャンセルする
-//		if (clickTarget == undefined) {
-//			this.excute7(x, y);
-//		}
+		// 別の攻撃対象をクリックした場合
+		if (clickTarget == "canAttackEnemy") {
+			this.excute12(x, y);
+		}
+		
+		// 攻撃できないキャラクターをクリックした場合
+		if (clickTarget == "charactor" 
+			|| clickTarget == "enemyCharactor"
+			|| clickTarget == "decideCharactor") {
+			this.excute6(x, y);
+		}
+		
+		// 別の移動先をクリックした場合　→移動中状態に
+		if (clickTarget == "moveMap") {
+			this.excute9(x, y);
+		}
+		
+		// 移動中のキャラクターをクリックした場合
+		if (clickTarget == "moveCharactor") {
+			this.excute10(x, y);
+		}
+		
+		// 関係ないマスをクリックした場合
+		if (clickTarget == undefined) {
+			this.excute7(x, y);
+		}
 
 	// 補助対象選択状態の場合
 	} else if (g_gamenStatus == "") {
@@ -338,9 +341,6 @@ feh_viewBattle.prototype.excute3 = function(x, y) {
  */
 feh_viewBattle.prototype.excute4 = function(x, y) {
 	
-	// その場で攻撃できる場合
-	// 移動しないと攻撃できない場合
-	
 	// 戦闘結果を表示する
 	this.showBattle(x, y);
 	
@@ -375,6 +375,12 @@ feh_viewBattle.prototype.excute6 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
 	this.viewStatus(x, y);
+	
+	// 攻撃対象選択状態をキャンセルする
+	this.unselectAttackEnemy();
+	
+	// 画面ステータス設定
+	g_gamenStatus = "moved";
 }
 
 /**
@@ -395,13 +401,65 @@ feh_viewBattle.prototype.excute7 = function(x, y) {
 	g_gamenStatus = "none";
 }
 
+/**
+ * 攻撃可能なキャラクターをクリックした場合
+ */
 feh_viewBattle.prototype.excute8 = function(x, y) {
 	
 	// クリックしたキャラクターを攻撃可能なマスに移動する
 	this.moveNearEnemy(x, y);
 }
 
+/**
+ * 攻撃対象選択中に別の移動先をクリックした場合
+ */
+feh_viewBattle.prototype.excute9 = function(x, y) {
+	
+	// 移動する
+	this.excute2(x, y);
+	
+	// 攻撃対象選択状態をキャンセルする
+	this.unselectAttackEnemy();
+}
 
+/**
+ * 攻撃対象選択中に移動キャラクターをクリックした場合
+ */
+feh_viewBattle.prototype.excute10 = function(x, y) {
+	
+	// クリックしたキャラクターのステータスを表示する
+	this.viewStatus(this._beforeMoveX, this._beforeMoveY);
+	
+	// 攻撃対象選択状態をキャンセルする
+	this.unselectAttackEnemy();
+	
+	// 画面ステータス設定
+	g_gamenStatus = "moved";
+}
+
+/**
+ * 状態なし、他のキャラクターを選択する処理
+ */
+feh_viewBattle.prototype.excute11 = function(x, y) {
+	
+	// クリックしたキャラクターのステータスを表示する
+	this.viewStatus(x, y);
+	
+	// 画面ステータス設定
+	g_gamenStatus = "none";
+}
+
+/**
+ * 攻撃対象選択中に、別の攻撃対象を選択する処理
+ */
+feh_viewBattle.prototype.excute12 = function(x, y) {
+	
+	// 攻撃対象選択状態をキャンセルする
+	this.unselectAttackEnemy();
+	
+	// クリックしたキャラクターを攻撃可能なマスに移動する
+	this.moveNearEnemy(x, y);	
+}
 /**
  * 行動をキャンセルする処理
  */
@@ -489,7 +547,7 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 	this.viewStatus(x, y);
 	
 	// キャラクター画面情報を更新する
-	g_gamen[x][y] = "movedCharactor";
+	g_gamen[x][y] = "moveCharactor";
 	
 	// 選択キャラクターの移動マス情報を保存する
 	this._beforeMoveX = x;
@@ -514,7 +572,7 @@ feh_viewBattle.prototype.moveCharactor = function(x, y) {
 
 	// 移動キャラクター情報を画面情報に設定する
 	g_gamen[this._afterMoveX][this._afterMoveY] = "moveMap";
-	g_gamen[x][y] = "movedCharactor";
+	g_gamen[x][y] = "moveCharactor";
 	
 	// キャラクター移動前、移動後のマスを保存する
 	this._afterMoveX = x;
@@ -745,6 +803,20 @@ feh_viewBattle.prototype.moveNearEnemy = function(x, y) {
 	// 攻撃情報を設定する
 	this.excute4(x, y);
 }
+
+/**
+ * 攻撃対象選択状態を解除します
+ */
+feh_viewBattle.prototype.unselectAttackEnemy = function() {
+	for (i=0; i<6; i++) {
+		for (j=0; j<8; j++) {
+			if(g_gamen[i][j] == "selectedAttackEnemy") {
+				g_gamen[i][j] = "canAttackEnemy";
+			}
+		}
+	}
+}
+
 
 
 
