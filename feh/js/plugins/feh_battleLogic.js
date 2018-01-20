@@ -19,6 +19,67 @@ feh_battleLogic.prototype = Object.create(Object.prototype);
 feh_battleLogic.prototype.constructor = feh_battleLogic;
 
 /**
+ * キャラクターが指定したマスを攻撃できるマス情報を取得する
+ * viewクラスから呼び出される処理。
+ */
+feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
+
+	var map = [
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+	];
+	
+	
+	if (g_bukiTypeData[charactor.bukiType].range == 1) {
+		if (this.isMap(x+1, y)) {
+			map[x+1][y] = true;
+		}
+		if (this.isMap(x, y+1)) {
+			map[x][y+1] = true;
+		}
+		if (this.isMap(x-1, y)) {
+			map[x-1][y] = true;
+		}
+		if (this.isMap(x, y-1)) {
+			map[x][y-1] = true;
+		}
+	} else if (g_bukiTypeData[charactor.bukiType].range == 2) {
+		if (this.isMap(x+2, y)) {
+			map[x+2][y] = true;
+		}
+		if (this.isMap(x+1, y+1)) {
+			map[x+1][y+1] = true;
+		}
+		if (this.isMap(x, y+2)) {
+			map[x][y+2] = true;
+		}
+		if (this.isMap(x-1, y+1)) {
+			map[x-1][y+1] = true;
+		}
+		if (this.isMap(x-2, y)) {
+			map[x-2][y] = true;
+		}
+		if (this.isMap(x-1, y-1)) {
+			map[x-1][y-1] = true;
+		}
+		if (this.isMap(x, y-2)) {
+			map[x][y-2] = true;
+		}
+		if (this.isMap(x+1, y-1)) {
+			map[x+1][y-1] = true;
+		}
+	}
+	console.dir("■map");
+	console.dir(map);
+	return map;
+}
+
+
+/**
  * x,yマスのキャラクターの移動可能なマップ情報を返却する。
  * viewクラスから呼び出される処理。
  * 
