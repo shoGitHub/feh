@@ -99,12 +99,13 @@ feh_battleLogic.prototype.getMoveMap = function(x, y) {
 	// ※x,yが反転することに注意
 	var moveMap = [
 			[-1, -1, -1, -1, -1, -1, -1, -1],
+			[-1, -1, -2, -1, -1, -2, -1, -1],
 			[-1, -1, -1, -1, -1, -1, -1, -1],
 			[-1, -1, -1, -1, -1, -1, -1, -1],
-			[-1, -1, -1, -1, -1, -1, -1, -1],
-			[-1, -1, -1, -1, -1, -1, -1, -1],
+			[-1, -1, -2, -1, -1, -2, -1, -1],
 			[-1, -1, -1, -1, -1, -1, -1, -1],
 	];
+	moveMap[x][y] = 2;
 	
 	// 移動可能マップ探索
 	this.searchMap(moveMap, 2, x, y);
@@ -161,13 +162,18 @@ feh_battleLogic.prototype.serch = function(moveMap, move, x, y) {
 		return false;
 	}
 	
+	// 敵キャラクターがいるマスは移動不可
+	if (g_gamen[x][y] == "enemyCharactor") {
+		return false;
+	}
+	
 	// 探索実行
 	moveMap[x][y] += move;
 	return (moveMap[x][y] > 0);
 }
 
 /**
- * 攻撃可能マップを取得します
+ * キャラクターが攻撃可能なマップ情報を取得します
  */
 feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 
@@ -181,11 +187,15 @@ feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 			[false, false, false, false, false, false, false, false],
 			[false, false, false, false, false, false, false, false],
 	];
-	
+
 	// 攻撃マップを作成
 	for (i=0; i<6; i++) {
 		for (j=0; j<8; j++) {
-			if (moveMap[i][j] >= 0) {
+			
+			// 移動可能なマスから攻撃範囲を探索する
+			if (moveMap[i][j] >= 0 
+					&& (g_gamen[i][j] == "moveMap" 
+						|| g_gamen[i][j] == "moveCharactor")) {
 				
 				// 遠近によって条件分け（未実装）
 				if (this.isMap(i+1, j)) {
@@ -200,6 +210,8 @@ feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 				if (this.isMap(i, j-1)) {
 					attackMap[i][j-1] = true; 
 				}
+			}else {
+				console.dir(g_gamen[i][j]);
 			}
 		}
 	}

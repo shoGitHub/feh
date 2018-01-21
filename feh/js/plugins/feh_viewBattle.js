@@ -503,6 +503,9 @@ feh_viewBattle.prototype.showCharactor = function(x, y) {
  */
 feh_viewBattle.prototype.selectCharactor = function(x, y) {
 	
+	// キャラクター画面情報を更新する
+	g_gamen[x][y] = "moveCharactor";
+	
 	// キャラクターを選択色にする
 	$gameScreen.tintPicture(this._charactor[x][y].imgNo, [-60, -60, 60, 60], 10);
 	
@@ -514,8 +517,7 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 				$gameScreen.tintPicture(this.getMapImgNo(i, j), [-60, -60, 60, 60], 10);
 				
 				// マップ画面情報を更新する
-				var temp = g_gamen[i][j];
-				if (temp == undefined) {
+				if (g_gamen[i][j] == undefined) {
 					g_gamen[i][j] = "moveMap";
 				}
 			}
@@ -545,9 +547,6 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 
 	// 選択したキャラのステータスを表示する
 	this.viewStatus(x, y);
-	
-	// キャラクター画面情報を更新する
-	g_gamen[x][y] = "moveCharactor";
 	
 	// 選択キャラクターの移動マス情報を保存する
 	this._beforeMoveX = x;
