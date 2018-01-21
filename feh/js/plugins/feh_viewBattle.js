@@ -510,7 +510,7 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 	$gameScreen.tintPicture(this._charactor[x][y].imgNo, [-60, -60, 60, 60], 10);
 	
 	// キャラクターの移動範囲を表示する
-	var moveMap = this._battleLogic.getMoveMap(x, y);
+	var moveMap = this._battleLogic.getMoveMap(this._charactor[x][y].status, x, y);
 	for (i=0; i<6; i++) {
 		for (j=0; j<8; j++) {
 			if (moveMap[i][j] >= 0) {
@@ -781,7 +781,9 @@ feh_viewBattle.prototype.moveNearEnemy = function(x, y) {
 	} else {
 		
 		// 移動可能なマス情報を取得する
-		var moveMap = this._battleLogic.getMoveMap(this._beforeMoveX, this._beforeMoveY);
+		var moveMap = this._battleLogic.getMoveMap(
+						this._charactor[this._beforeMoveX][this._beforeMoveY].status, 
+						this._beforeMoveX, this._beforeMoveY);
 		
 		// 指定した敵が攻撃可能かつ移動可能なマスを特定する
 		for (i=0; i<6; i++) {

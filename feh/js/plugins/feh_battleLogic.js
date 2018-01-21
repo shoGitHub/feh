@@ -24,6 +24,7 @@ feh_battleLogic.prototype.constructor = feh_battleLogic;
  */
 feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
 
+	// 初期化
 	var map = [
 			[false, false, false, false, false, false, false, false],
 			[false, false, false, false, false, false, false, false],
@@ -33,7 +34,7 @@ feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
 			[false, false, false, false, false, false, false, false],
 	];
 	
-	
+	// 攻撃範囲１の場合
 	if (g_bukiTypeData[charactor.bukiType].range == 1) {
 		if (this.isMap(x+1, y)) {
 			map[x+1][y] = true;
@@ -47,6 +48,8 @@ feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
 		if (this.isMap(x, y-1)) {
 			map[x][y-1] = true;
 		}
+		
+	// 攻撃範囲２の場合
 	} else if (g_bukiTypeData[charactor.bukiType].range == 2) {
 		if (this.isMap(x+2, y)) {
 			map[x+2][y] = true;
@@ -73,8 +76,7 @@ feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
 			map[x+1][y-1] = true;
 		}
 	}
-	console.dir("■map");
-	console.dir(map);
+
 	return map;
 }
 
@@ -88,13 +90,16 @@ feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
  * 			array[x][y] == false の場合、x,yマスに移動不可
  * 			array[x][y] == true の場合、x,yマスに移動不可
  */
-feh_battleLogic.prototype.getMoveMap = function(x, y) {
+feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 	
 	/*
 	 * アルゴリズムは次のURLを参照
 	 * http://2dgames.jp/2012/05/22/%E6%88%A6%E8%A1%93slg%E3%81%AE%E4%BD%9C%E3%82%8A%E6%96%B9%EF%BC%88%E7%A7%BB%E5%8B%95%E7%AF%84%E5%9B%B2%E3%82%92%E6%B1%82%E3%82%81%E3%82%8B%EF%BC%89/
 	 */
 	
+	// 移動距離
+	var moveRange = parseInt(g_moveTypeData[charactor.idouType].moveRange);
+
 	// 移動可能マップ初期化
 	// ※x,yが反転することに注意
 	var moveMap = [
@@ -105,10 +110,10 @@ feh_battleLogic.prototype.getMoveMap = function(x, y) {
 			[-1, -1, -2, -1, -1, -2, -1, -1],
 			[-1, -1, -1, -1, -1, -1, -1, -1],
 	];
-	moveMap[x][y] = 2;
+	moveMap[x][y] = moveRange;
 	
 	// 移動可能マップ探索
-	this.searchMap(moveMap, 2, x, y);
+	this.searchMap(moveMap, moveRange, x, y);
 	
 	return moveMap;
 }
@@ -177,6 +182,9 @@ feh_battleLogic.prototype.serch = function(moveMap, move, x, y) {
  */
 feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 
+	// 攻撃距離
+	var attackRange = parseInt(g_bukiTypeData[charactor.bukiType].range);
+
 	// 攻撃可能マップ初期化
 	// ※x,yが反転することに注意
 	var attackMap = [
@@ -196,22 +204,49 @@ feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 			if (moveMap[i][j] >= 0 
 					&& (g_gamen[i][j] == "moveMap" 
 						|| g_gamen[i][j] == "moveCharactor")) {
-				
-				// 遠近によって条件分け（未実装）
-				if (this.isMap(i+1, j)) {
-					attackMap[i+1][j] = true; 
+
+				// 近距離攻撃の場合
+				if (attackRange == 1) {
+					if (this.isMap(i+1, j)) {
+						attackMap[i+1][j] = true; 
+					}
+					if (this.isMap(i, j+1)) {
+						attackMap[i][j+1] = true; 
+					}
+					if (this.isMap(i-1, j)) {
+						attackMap[i-1][j] = true; 
+					}
+					if (this.isMap(i, j-1)) {
+						attackMap[i][j-1] = true; 
+					}
+
+				// 遠距離攻撃の場合
+				} else if (attackRange == 2) {
+					if (this.isMap(i+2, j)) {
+						attackMap[i+2][j] = true;
+					}
+					if (this.isMap(i+1, j+1)) {
+						attackMap[i+1][j+1] = true;
+					}
+					if (this.isMap(i, j+2)) {
+						attackMap[i][j+2] = true;
+					}
+					if (this.isMap(i-1, j+1)) {
+						attackMap[i-1][j+1] = true;
+					}
+					if (this.isMap(i-2, j)) {
+						attackMap[i-2][j] = true;
+					}
+					if (this.isMap(i-1, j-1)) {
+						attackMap[i-1][j-1] = true;
+					}
+					if (this.isMap(i, j-2)) {
+						attackMap[i][j-2] = true;
+					}
+					if (this.isMap(i+1, j-1)) {
+						attackMap[i+1][j-1] = true;
+					}
 				}
-				if (this.isMap(i, j+1)) {
-					attackMap[i][j+1] = true; 
-				}
-				if (this.isMap(i-1, j)) {
-					attackMap[i-1][j] = true; 
-				}
-				if (this.isMap(i, j-1)) {
-					attackMap[i][j-1] = true; 
-				}
-			}else {
-				console.dir(g_gamen[i][j]);
 			}
 		}
 	}
