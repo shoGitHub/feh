@@ -88,6 +88,10 @@ function fehInit() {
  * @returns
  */
 function clickAction() {
+
+	// クリックしたマスを特定する
+	var x = $gameMap.canvasToMapX(TouchInput.x);
+	var y = $gameMap.canvasToMapY(TouchInput.y);
 	
 	// デバッグログ
 	console.dir("■start clickAction");
@@ -96,10 +100,6 @@ function clickAction() {
 	console.dir(g_gamen);
 	console.dir(x);
 	console.dir(y);
-
-	// クリックしたマスを特定する
-	var x = $gameMap.canvasToMapX(TouchInput.x);
-	var y = $gameMap.canvasToMapY(TouchInput.y);
 	
 	// クリックした対象を取得する
 	var clickTarget = getClickTarget(x, y);

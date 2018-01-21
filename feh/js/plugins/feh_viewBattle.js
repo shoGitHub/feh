@@ -571,6 +571,9 @@ feh_viewBattle.prototype.moveCharactor = function(x, y) {
 
 	// 移動キャラクター情報を画面情報に設定する
 	g_gamen[this._afterMoveX][this._afterMoveY] = "moveMap";
+	console.dir(g_gamen);
+	console.dir(x);
+	console.dir(y);
 	g_gamen[x][y] = "moveCharactor";
 	
 	// キャラクター移動前、移動後のマスを保存する
@@ -784,13 +787,13 @@ feh_viewBattle.prototype.moveNearEnemy = function(x, y) {
 		var moveMap = this._battleLogic.getMoveMap(
 						this._charactor[this._beforeMoveX][this._beforeMoveY].status, 
 						this._beforeMoveX, this._beforeMoveY);
-		
+
 		// 指定した敵が攻撃可能かつ移動可能なマスを特定する
 		for (i=0; i<6; i++) {
 			for (j=0; j<8; j++) {
 				if (attackMap[i][j] 
 						&& moveMap[i][j] >= 0 
-						&& this._charactor[i][j] == undefined) {
+						&& g_gamen[i][j] == "moveMap") {
 					resultX = i;
 					resultY = j;
 				}

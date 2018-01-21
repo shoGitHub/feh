@@ -98,10 +98,18 @@ feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 	 */
 	
 	// 移動距離
+	var moveType = charactor.idouType;
 	var moveRange = parseInt(g_moveTypeData[charactor.idouType].moveRange);
-
-	// 移動可能マップ初期化
-	// ※x,yが反転することに注意
+	
+	/*
+	 * 移動可能マップ初期化
+	 * ※x,yが反転することに注意
+	 * 　-1　→　平地
+	 * 　-2　→　森
+	 * 　 7　→　壁（移動不可地形）
+	 * 　 8　→　川（飛行移動可能地形）
+	 * 　 9　→　溝（騎馬移動難航地形）
+	 */
 	var moveMap = [
 			[-1, -1, -1, -1, -1, -1, -1, -1],
 			[-1, -1, -2, -1, -1, -2, -1, -1],
@@ -113,7 +121,7 @@ feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 	moveMap[x][y] = moveRange;
 	
 	// 移動可能マップ探索
-	this.searchMap(moveMap, moveRange, x, y);
+	this.searchMap(moveMap, moveType, moveRange, x, y);
 	
 	return moveMap;
 }
@@ -121,38 +129,39 @@ feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 /**
  * 移動範囲探索アルゴリズム
  */
-feh_battleLogic.prototype.searchMap = function(moveMap, move, x, y) {
+feh_battleLogic.prototype.searchMap = function(
+			moveMap, moveType, moveRange, x, y) {
 	
 	// 移動力０の場合、探索終了
-	if (move == 0) {
+	if (moveRange == 0) {
 		return;
 	}
 	
 	// 上方向を探索
 	if ((y - 1) >= 0) {
-		if (this.serch(moveMap, move, x, y-1)) {
-			this.searchMap(moveMap, move-1, x, y-1);
+		if (this.serch(moveMap, moveType, moveRange, x, y-1)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x, y-1);
 		}
 	}
 	
 	// 右方向を探索
 	if ((x + 1) <= 5) {
-		if (this.serch(moveMap, move, x+1, y)) {
-			this.searchMap(moveMap, move-1, x+1, y);
+		if (this.serch(moveMap, moveType, moveRange, x+1, y)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x+1, y);
 		}
 	}
 	
 	// 下方向を探索
 	if ((y + 1) <= 7) {
-		if (this.serch(moveMap, move, x, y+1)) {
-			this.searchMap(moveMap, move-1, x, y+1);
+		if (this.serch(moveMap, moveType, moveRange, x, y+1)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x, y+1);
 		}
 	}
 	
 	// 左方向を探索
 	if ((x - 1) >= 0) {
-		if (this.serch(moveMap, move, x-1, y)) {
-			this.searchMap(moveMap, move-1, x-1, y);
+		if (this.serch(moveMap, moveType, moveRange, x-1, y)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x-1, y);
 		}
 	}	
 }
@@ -160,7 +169,7 @@ feh_battleLogic.prototype.searchMap = function(moveMap, move, x, y) {
 /**
  * 移動範囲探索アルゴリズム
  */
-feh_battleLogic.prototype.serch = function(moveMap, move, x, y) {
+feh_battleLogic.prototype.serch = function(moveMap, moveType, moveRange, x, y) {
 	
 	// 探索済みの場合
 	if (moveMap[x][y] > 0) {
@@ -172,8 +181,22 @@ feh_battleLogic.prototype.serch = function(moveMap, move, x, y) {
 		return false;
 	}
 	
+	// 森地形の場合
+	if (moveMap[x][y] == -2) {
+		
+		// 騎馬は移動不可
+		if (moveType == 1) {
+			return false;
+		}
+		
+		// 重装は -1
+		if (moveType == 2) {
+			moveRange += 1;
+		}
+	}
+	
 	// 探索実行
-	moveMap[x][y] += move;
+	moveMap[x][y] += moveRange;
 	return (moveMap[x][y] > 0);
 }
 
