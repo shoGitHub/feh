@@ -54,12 +54,24 @@ var g_viewBattle = null;
  * @returns
  */
 function fehInit() {
+
+	// グローバル変数を初期化する
+	g_gamenStatus = undefined;
+	g_messageArray = new Array();
+	g_gamen = new Array();
+	g_selectedIdArray = new Array();
+	g_startBattleFlg = false;
+	g_viewSelect = null;
+	g_viewBattle = null;
 	
 	// 画面情報を初期化
 	clearGamen();
 	
 	// 選択画面を呼び出す
 	g_viewSelect = new feh_viewSelect();
+	
+	// データ初期化
+	initData();
 	
 	// 戦闘画面テストモードの場合
 	// 必要なデータを設定して、戦闘画面から始めます
@@ -94,12 +106,12 @@ function clickAction() {
 	var y = $gameMap.canvasToMapY(TouchInput.y);
 	
 	// デバッグログ
-	console.dir("■start clickAction");
-	console.dir("■gamenStatus, gamen, x, y");
-	console.dir(g_gamenStatus);
-	console.dir(g_gamen);
-	console.dir(x);
-	console.dir(y);
+//	console.dir("■start clickAction");
+//	console.dir("■gamenStatus, gamen, x, y");
+//	console.dir(g_gamenStatus);
+//	console.dir(g_gamen);
+//	console.dir(x);
+//	console.dir(y);
 	
 	// クリックした対象を取得する
 	var clickTarget = getClickTarget(x, y);
@@ -114,10 +126,10 @@ function clickAction() {
 	}
 	
 	// デバッグログ
-	console.dir("■end clickAction");
-	console.dir("■gamenStatus, gamen");
-	console.dir(g_gamenStatus);
-	console.dir(g_gamen);
+//	console.dir("■end clickAction");
+//	console.dir("■gamenStatus, gamen");
+//	console.dir(g_gamenStatus);
+//	console.dir(g_gamen);
 }
 
 /**
@@ -185,5 +197,15 @@ function getClickTarget(x, y) {
  */
 function copyObject(target) {
 	return JSON.parse(JSON.stringify(target) || "null");
+}
+
+/**
+ * データを初期化します
+ * @returns
+ */
+function initData() {
+	for (i=0; i<g_sentoshaData.length; i++) {
+		g_sentoshaData[i].nokoriHp = g_sentoshaData[i].hp;
+	}
 }
 

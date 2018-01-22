@@ -8,6 +8,12 @@ function testFunction() {
 	console.dir(battle);
 }
 
+
+/***********************************************************************************************************************
+ * constructor
+ *
+ */
+
 /**
  * コンストラクタ
  * @returns
@@ -17,6 +23,12 @@ function feh_battleLogic() {
 
 feh_battleLogic.prototype = Object.create(Object.prototype);
 feh_battleLogic.prototype.constructor = feh_battleLogic;
+
+
+/***********************************************************************************************************************
+ * map
+ *
+ */
 
 /**
  * キャラクターが指定したマスを攻撃できるマス情報を取得する
@@ -275,8 +287,8 @@ feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 	}
 	
 	// デバッグログ
-	console.dir("■attackMap");
-	console.dir(attackMap);
+//	console.dir("■attackMap");
+//	console.dir(attackMap);
 	
 	// 攻撃マップを返却
 	return attackMap;
@@ -293,6 +305,11 @@ feh_battleLogic.prototype.isMap = function(x, y) {
 	}
 	return true;
 }
+
+/***********************************************************************************************************************
+ * battle
+ *
+ */
 
 /**
  * バトルデータを設定する
@@ -316,6 +333,8 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 	battle.kougekiDataArray = [];
 	battle.kougekishaShibouFlg = false;
 	battle.hangekishaShibouFlg = false;
+	kougekisha.tmpHp = kougekisha.nokoriHp;
+	hangekisha.tmpHp = hangekisha.nokoriHp;
 	var isEnd = false;
 	for (i = 0; i < battle.kougekiJunArray.length; i++) {
 		
@@ -390,7 +409,8 @@ feh_battleLogic.prototype.setKougekiData =
 	kougeki.shubishaoOgiHendou = -1;						// 守備者奥義変動値
 	kougeki.kougekishaOugiFlg = false;				// 攻撃者奥義有無
 	kougeki.shubishaOugiFlg = false;					// 守備者奥義有無
-	if (kougeki.shubisha.nokoriHp <= kougeki.damage) {			// 守備者死亡判定
+	shubisha.tmpHp -= kougeki.damage;
+	if (shubisha.tmpHp <= 0) {			// 守備者死亡判定
 		kougeki.shubishaShibouFlg = true;
 	} else {
 		kougeki.shubishaShibouFlg = false;
@@ -436,13 +456,41 @@ feh_battleLogic.prototype.setKougekiJun = function(kougekisha, hangekisha) {
 feh_battleLogic.prototype.culcDamage = function(kougekisha, shubisha) {
 
 	var damage = 0;
-
+	var rate = 1;
+	var kougeki = kougekisha.kougeki;
+	var bougyo;
+	
 	// ダメージタイプ考慮
 	if (g_bukiTypeData[kougekisha.bukiType].damageType == "butsuri") {
-		damage = kougekisha.kougeki - shubisha.shubi;
+		bougyo = shubisha.shubi;
 	} else {
-		damage = kougekisha.kougeki - shubisha.mabou;
+		bougyo = shubisha.mabou;
 	}
+	
+	// 倍率を算出
+	// 有利色の判定
+	if ((g_bukiTypeData[kougekisha.bukiType].color == "red" && g_bukiTypeData[shubisha.bukiType].color == "green")
+			|| (g_bukiTypeData[kougekisha.bukiType].color == "green" && g_bukiTypeData[shubisha.bukiType].color == "blue")
+			|| (g_bukiTypeData[kougekisha.bukiType].color == "blue" && g_bukiTypeData[shubisha.bukiType].color == "red")) {
+		rate += 0.2;
+	}
+	
+	// 不利色の判定
+	if ((g_bukiTypeData[kougekisha.bukiType].color == "red" && g_bukiTypeData[shubisha.bukiType].color == "blue")
+			|| (g_bukiTypeData[kougekisha.bukiType].color == "green" && g_bukiTypeData[shubisha.bukiType].color == "red")
+			|| (g_bukiTypeData[kougekisha.bukiType].color == "blue" && g_bukiTypeData[shubisha.bukiType].color == "green")) {
+		rate -= 0.2;
+	}
+	
+	// 倍率の小数点を考慮
+	if (rate < 1) {
+		kougeki = Math.trunc(kougeki * rate)+1;
+	} else {
+		kougeki = Math.trunc(kougeki * rate);
+	}
+	
+	// ダメージを算出
+	damage = kougeki - bougyo;
 	
 	// 0考慮
 	if (damage < 0) {

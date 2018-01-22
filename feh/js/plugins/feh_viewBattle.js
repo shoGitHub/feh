@@ -155,10 +155,10 @@ feh_viewBattle.prototype.initView = function() {
 feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 
 	// デバッグログ
-	console.dir("■start battle excute");
-	console.dir("■battle, charactor");
-	console.dir(this._battle);
-	console.dir(this._charactor);
+//	console.dir("■start battle excute");
+//	console.dir("■battle, charactor");
+//	console.dir(this._battle);
+//	console.dir(this._charactor);
 	
 	// 状態なしの場合
 	if (g_gamenStatus == "none") {
@@ -278,10 +278,10 @@ feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 	}
 
 	// デバッグログ
-	console.dir("■end battle excute");
-	console.dir("■battle, charactor");
-	console.dir(this._battle);
-	console.dir(this._charactor);
+//	console.dir("■end battle excute");
+//	console.dir("■battle, charactor");
+//	console.dir(this._battle);
+//	console.dir(this._charactor);
 };
 
 
@@ -366,6 +366,11 @@ feh_viewBattle.prototype.excute5 = function(x, y) {
 	
 	// 画面ステータス設定
 	g_gamenStatus = "none";
+	
+	// ゲーム終了の場合
+	if (this.isGameEnd()) {
+		this.endGame();
+	}
 }
 
 /*
@@ -571,9 +576,6 @@ feh_viewBattle.prototype.moveCharactor = function(x, y) {
 
 	// 移動キャラクター情報を画面情報に設定する
 	g_gamen[this._afterMoveX][this._afterMoveY] = "moveMap";
-	console.dir(g_gamen);
-	console.dir(x);
-	console.dir(y);
 	g_gamen[x][y] = "moveCharactor";
 	
 	// キャラクター移動前、移動後のマスを保存する
@@ -821,7 +823,18 @@ feh_viewBattle.prototype.unselectAttackEnemy = function() {
 	}
 }
 
-
+/**
+ * ゲーム終了処理
+ */
+feh_viewBattle.prototype.endGame = function() {
+	this.clearInfo();
+	showMessage("戦闘終了！", 380, 150);
+	g_gamenStatus = "enable";
+	setTimeout((function() {
+		SceneManager.goto(Scene_Title);
+	}),
+	1000);
+}
 
 
 
@@ -909,6 +922,27 @@ feh_viewBattle.prototype.clearMoveMap = function() {
 			}
 		}
 	}
+}
+
+/**
+ * ゲーム終了かどうかを判定する
+ */
+feh_viewBattle.prototype.isGameEnd = function() {
+
+	var blue = 0;
+	var red = 0;
+	for (i=0; i<6; i++) {
+		for (j=0; j<8; j++) {
+			if (this._charactor[i][j] != undefined) {
+				if (this._charactor[i][j].team == "blue") {
+					blue++;
+				} else if(this._charactor[i][j].team == "red") {
+					red++;
+				}
+			}
+		}
+	}
+	return (blue == 0 || red == 0);
 }
 
 /**
