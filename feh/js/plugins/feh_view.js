@@ -1,7 +1,30 @@
 
-//------------------------------------------------------------------
-// グローバルデータ
+/*
+ * コード整理内容
+ * ・クラス分け
+ * ・プライベートとパpブリックめそっどわけ
+ * 
+ * 
+ */
 
+
+/**
+ * feh_view
+ * 
+ * 画面がクリックされて最初に呼び出されるクラスです。
+ * 以下の関数とデータを所持します。
+ * 
+ * ・ゲームの初期化関数
+ * ・画面をクリックされて呼び出される関数
+ * ・グローバルデータ
+ * ・共通の便利関数
+ * 
+ */
+
+
+/*******************************************************************
+ * グローバルデータ
+ *******************************************************************/
 
 /**
  * テストモード
@@ -36,18 +59,23 @@ var g_startBattleFlg = false;
 /**
  * 選択画面クラス
  */
-var g_viewSelect = null;
+//var g_viewSelect = null;
 
 /**
  * バトル画面クラス
  */
 var g_viewBattle = null;
 
+/**
+ * デザイナークラス
+ */
+var g_designer = null;
 
 
-//------------------------------------------------------------------
-// 共通関数
 
+/*******************************************************************
+ * feh初期化関数
+ *******************************************************************/
 
 /**
  * 初期化を行う
@@ -61,14 +89,15 @@ function fehInit() {
 	g_gamen = new Array();
 	g_selectedIdArray = new Array();
 	g_startBattleFlg = false;
-	g_viewSelect = null;
-	g_viewBattle = null;
+//	g_viewSelect = undefined;
+	g_viewBattle = undefined;
+	g_designer = new feh_designer();
 	
 	// 画面情報を初期化
 	clearGamen();
 	
 	// 選択画面を呼び出す
-	g_viewSelect = new feh_viewSelect();
+//	g_viewSelect = new feh_viewSelect();
 	
 	// データ初期化
 	initData();
@@ -87,12 +116,17 @@ function fehInit() {
 		g_sentoshaData[7].shozokuTeam = "red";
 		g_startBattleFlg = true;
 		g_gamenStatus = undefined;
-		clearMessage();
-		clearImg();
+		g_designer.clearMessage();
+		g_designer.clearImg();
 		clearGamen();
 		g_viewBattle = new feh_viewBattle();
 	}
 }
+
+
+/*******************************************************************
+ * 画がクリックされると呼び出される関数
+ *******************************************************************/
 
 /**
  * クリックされた画面のマスを特定して、
@@ -118,7 +152,7 @@ function clickAction() {
 	
 	// バトルスタート前の場合、選択画面の処理を行う
 	if (!g_startBattleFlg) {
-		g_viewSelect.excute(x, y, clickTarget);
+//		g_viewSelect.excute(x, y, clickTarget);
 		
 	// バトルスタート後の場合、バトル画面の処理を行う
 	} else {
@@ -126,44 +160,18 @@ function clickAction() {
 	}
 	
 	// デバッグログ
-//	console.dir("■end clickAction");
-//	console.dir("■gamenStatus, gamen");
-//	console.dir(g_gamenStatus);
-//	console.dir(g_gamen);
+	console.dir("■end clickAction");
+	console.dir("■gamenStatus, gamen");
+	console.dir(g_gamenStatus);
+	console.dir(g_gamen);
 }
 
-/**
- * 画面にメッセージを表示する
- * @param message
- * @param x
- * @param y
- * @returns
- */
-function showMessage(message, x, y) {
-	var param = new Array();
-	param.message = message;
-	param.x = x;
-	param.y = y;
-	g_messageArray.push(param);
-}
 
-/**
- * メッセージを全て消去します
- * @returns
- */
-function clearMessage() {
-	g_messageArray = new Array();
-}
 
-/**
- * 表示画像を全て消去します
- * @returns
- */
-function clearImg() {
-	for (var i=0; i<200; i++) {
-		$gameScreen.erasePicture(i);
-	}
-}
+/*******************************************************************
+ * 共通のutil関数
+ *******************************************************************/
+
 
 /**
  * 画面情報を全て消去します

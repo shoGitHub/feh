@@ -1,8 +1,17 @@
 
-/***********************************************************************************************************************
- * constracta
- *
+/**
+ * feh_viewBattle
+ * 
+ * バトル画面のコントロールを担当するクラスです。
+ * 画面クリックに対して、何の処理を行うかコントロールします。
+ * 
+ * 
  */
+
+
+/*******************************************************************
+ * パブリック関数
+ *******************************************************************/
 
 /**
  * コンストラクタ
@@ -23,128 +32,6 @@ function feh_viewBattle() {
 feh_viewBattle.prototype = Object.create(Object.prototype);
 feh_viewBattle.prototype.constructor = feh_viewBattle;
 
-
-
-/***********************************************************************************************************************
- * init
- *
- */
-
-/**
- * バトル画面のデータを初期設定します
- */
-feh_viewBattle.prototype.initData = function() {
-
-	/**
-	 * 戦闘画面表示に必要な情報
-	 * 
-	 * 戦闘情報
-	 * 　ターン数
-	 * 　どちらチームのターンか？
-	 * 　青チームの残り人数
-	 * 　赤チームの残り人数
-	 * 　勝利したチームはどっちか？
-	 * 　選択中キャラクター
-	 * 
-	 * オブジェクト情報
-	 * 　マスに存在するオブジェクト（破壊可能な壁とか）
-	 * 
-	 * キャラクター情報
-	 * 　所属チーム
-	 * 　行動済みフラグ
-	 * 　死亡フラグ
-	 * 　ステータス
-	 * 　画像No
-	 * 
-	 * 画面情報
-	 * 　攻撃情報
-	 * 　キャラクター移動前のマス情報
-	 * 　キャラクター移動後のマス情報
-	 */
-	
-	// オブジェクト情報（未実装）
-	this._object = undefined
-	
-	// バトル情報
-	this._battle = {
-//			turnNum: 0,
-			turn: "blue",
-			blueNum: 4,
-			redNum: 4,
-			victoryTeam: undefined,
-			selectedCharactor: undefined
-	};
-	
-	// キャラクター情報
-	this._charactor = [
-		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
-		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
-		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
-		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
-		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
-		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
-	];
-	for (i=0; i < g_selectedIdArray.length; i++) {
-		var charactor = {};
-		charactor.status = g_sentoshaData[g_selectedIdArray[i]];
-		charactor.decidedFlg = false;
-		charactor.deadFlg = false;
-		// キャラクターの画像Noは６０～６７
-		charactor.imgNo = i + 60;
-		if (i < 4) {
-			charactor.team = "blue";
-		} else {
-			charactor.team = "red";
-		}
-		var x = 1 + (i % 4);
-		var y = 0;
-		if (i > 3) {
-			y = 3;
-		}
-		this._charactor[x][y] = charactor;
-	}
-	
-	// キャラクター移動前のマス
-	this._beforeMoveX = undefined;
-	this._beforeMoveY = undefined;
-	
-	// キャラクター移動後のマス
-	this._afterMoveX = undefined;
-	this._afterMoveY = undefined;
-	
-	// 攻撃情報
-	this._attackData = undefined;
-}
-
-/**
- * バトル画面を初期化する
- * @returns
- */
-feh_viewBattle.prototype.initView = function() {
-
-	var c = 0;
-	for (i=0; i<8; i++) {
-		for (j=0; j<6; j++) {
-			
-			// マップを表示する
-			// ※マップの画像IDは１～４８
-			$gameScreen.showPicture(c+1, "map/map_" + c++, 0, 60*j, 60*i, 100, 100, 255, 0);
-
-			// キャラクターを表示する
-			if (this._charactor[j][i] != undefined) {
-				this.showCharactor(j, i);
-			}
-		}
-	}
-	
-	// 画面ステータス設定
-	g_gamenStatus = "none";
-};
-
-/***********************************************************************************************************************
- * excute main
- *
- */
 
 /**
  * バトル画面の処理を実行します
@@ -278,18 +165,136 @@ feh_viewBattle.prototype.excute = function(x, y, clickTarget) {
 	}
 
 	// デバッグログ
-//	console.dir("■end battle excute");
-//	console.dir("■battle, charactor");
-//	console.dir(this._battle);
-//	console.dir(this._charactor);
+	console.dir("■end battle excute");
+	console.dir("■battle, charactor");
+	console.dir(this._battle);
+	console.dir(this._charactor);
 };
 
 
-/***********************************************************************************************************************
- * excute
- *
- */
 
+/*******************************************************************
+ * プライベート関数　初期化関数
+ *******************************************************************/
+
+/**
+ * バトル画面のデータを初期設定します
+ */
+feh_viewBattle.prototype.initData = function() {
+
+	/**
+	 * 戦闘画面表示に必要な情報
+	 * 
+	 * 戦闘情報
+	 * 　ターン数
+	 * 　どちらチームのターンか？
+	 * 　青チームの残り人数
+	 * 　赤チームの残り人数
+	 * 　勝利したチームはどっちか？
+	 * 　選択中キャラクター
+	 * 
+	 * オブジェクト情報
+	 * 　マスに存在するオブジェクト（破壊可能な壁とか）
+	 * 
+	 * キャラクター情報
+	 * 　所属チーム
+	 * 　行動済みフラグ
+	 * 　死亡フラグ
+	 * 　ステータス
+	 * 　画像No
+	 * 
+	 * 画面情報
+	 * 　攻撃情報
+	 * 　キャラクター移動前のマス情報
+	 * 　キャラクター移動後のマス情報
+	 */
+	
+	// オブジェクト情報（未実装）
+	this._object = undefined
+	
+	// バトル情報
+	this._battle = {
+//			turnNum: 0,
+			turn: "blue",
+			blueNum: 4,
+			redNum: 4,
+			victoryTeam: undefined,
+			selectedCharactor: undefined
+	};
+	
+	// キャラクター情報
+	this._charactor = [
+		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+		[undefined, undefined, undefined, undefined, undefined, undefined, undefined, undefined],
+	];
+	for (i=0; i < g_selectedIdArray.length; i++) {
+		var charactor = {};
+		charactor.status = g_sentoshaData[g_selectedIdArray[i]];
+		charactor.decidedFlg = false;
+		charactor.deadFlg = false;
+		if (i < 4) {
+			charactor.team = "blue";
+		} else {
+			charactor.team = "red";
+		}
+		var x = 1 + (i % 4);
+		var y = 0;
+		if (i > 3) {
+			y = 7;
+		}
+		this._charactor[x][y] = charactor;
+	}
+	
+	// キャラクター移動前のマス
+	this._beforeMoveX = undefined;
+	this._beforeMoveY = undefined;
+	
+	// キャラクター移動後のマス
+	this._afterMoveX = undefined;
+	this._afterMoveY = undefined;
+	
+	// 攻撃情報
+	this._attackData = undefined;
+}
+
+/**
+ * バトル画面を初期化する
+ * @returns
+ */
+feh_viewBattle.prototype.initView = function() {
+	
+	// マップを表示する
+	g_designer.showMap();
+
+	// キャラクターを表示する
+	for (i=0; i<6; i++) {
+		for (j=0; j<8; j++) {
+			if (this._charactor[i][j] != undefined) {
+				g_designer.showCharactor(this._charactor[i][j], i, j);
+				
+				// キャラクター情報を画面情報に設定する
+				if (this._charactor[i][j].team == "blue") {
+					g_gamen[i][j] = "charactor";
+				} else {
+					g_gamen[i][j] = "enemyCharactor";
+				}
+			}
+		}
+	}
+	
+	// 画面ステータス設定
+	g_gamenStatus = "none";
+};
+
+
+
+/*******************************************************************
+ * プライベート関数　main処理
+ *******************************************************************/
 
 /**
  * キャラ選択処理
@@ -379,7 +384,7 @@ feh_viewBattle.prototype.excute5 = function(x, y) {
 feh_viewBattle.prototype.excute6 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
-	this.viewStatus(x, y);
+	g_designer.charactorStatus(this._charactor[x][y]);
 	
 	// 攻撃対象選択状態をキャンセルする
 	this.unselectAttackEnemy();
@@ -394,10 +399,9 @@ feh_viewBattle.prototype.excute6 = function(x, y) {
 feh_viewBattle.prototype.excute7 = function(x, y) {
 	
 	// 選択キャラクターの表示を元に戻す
-	$gameScreen.movePicture(
-			this._charactor[this._beforeMoveX][this._beforeMoveY].imgNo, 
-			0, this._beforeMoveX * 60, this._beforeMoveY * 60, 100, 100, 255, 0, 10);
-	$gameScreen.tintPicture(this._charactor[this._beforeMoveX][this._beforeMoveY].imgNo, [0, 0, 0, 0], 10);
+	g_designer.moveCharactor(
+			this._charactor[this._beforeMoveX][this._beforeMoveY], this._beforeMoveX, this._beforeMoveY);
+	g_designer.normalCharactor(this._charactor[this._beforeMoveX][this._beforeMoveY]);
 
 	// バトル画面の情報をクリアする
 	this.clearBattleViewInfo();
@@ -433,7 +437,7 @@ feh_viewBattle.prototype.excute9 = function(x, y) {
 feh_viewBattle.prototype.excute10 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
-	this.viewStatus(this._beforeMoveX, this._beforeMoveY);
+	g_designer.charactorStatus(this._charactor[this._beforeMoveX][this._beforeMoveY]);
 	
 	// 攻撃対象選択状態をキャンセルする
 	this.unselectAttackEnemy();
@@ -448,7 +452,7 @@ feh_viewBattle.prototype.excute10 = function(x, y) {
 feh_viewBattle.prototype.excute11 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
-	this.viewStatus(x, y);
+	g_designer.charactorStatus(this._charactor[x][y]);
 	
 	// 画面ステータス設定
 	g_gamenStatus = "none";
@@ -471,7 +475,7 @@ feh_viewBattle.prototype.excute12 = function(x, y) {
 feh_viewBattle.prototype.excute99 = function() {
 	
 	// 選択キャラクターの表示を元に戻す
-	$gameScreen.tintPicture(this._battle.selectedCharactor.imgNo, [0, 0, 0, 0], 10);
+	g_designer.normalCharactor(this._battle.selectedCharactor);
 
 	// バトル画面の情報をクリアする
 	this.clearBattleViewInfo();
@@ -480,28 +484,11 @@ feh_viewBattle.prototype.excute99 = function() {
 	g_gamenStatus = "none";
 }
 
-/***********************************************************************************************************************
- * view
- *
- */
 
-/**
- * 画面にキャラクターを表示します
- */
-feh_viewBattle.prototype.showCharactor = function(x, y) {
-		
-	// キャラクターを画面に表示する
-	$gameScreen.showPicture(
-			this._charactor[x][y].imgNo,
-			"sd/" + this._charactor[x][y].status.img, 0, x*60, y*60, 100, 100, 255, 0);
-	
-	// キャラクター情報を画面情報に設定する
-	if (this._charactor[x][y].team == "blue") {
-		g_gamen[x][y] = "charactor";
-	} else {
-		g_gamen[x][y] = "enemyCharactor";
-	}
-};
+
+/*******************************************************************
+ * プライベート関数　excuteから呼び出される処理
+ *******************************************************************/
 
 /**
  * キャラクター選択表示処理
@@ -512,14 +499,14 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 	g_gamen[x][y] = "moveCharactor";
 	
 	// キャラクターを選択色にする
-	$gameScreen.tintPicture(this._charactor[x][y].imgNo, [-60, -60, 60, 60], 10);
+	g_designer.selectCharactor(this._charactor[x][y]);
 	
 	// キャラクターの移動範囲を表示する
 	var moveMap = this._battleLogic.getMoveMap(this._charactor[x][y].status, x, y);
 	for (i=0; i<6; i++) {
 		for (j=0; j<8; j++) {
 			if (moveMap[i][j] >= 0) {
-				$gameScreen.tintPicture(this.getMapImgNo(i, j), [-60, -60, 60, 60], 10);
+				g_designer.moveMap(i, j);
 				
 				// マップ画面情報を更新する
 				if (g_gamen[i][j] == undefined) {
@@ -544,14 +531,14 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 
 				// 移動不可かつ攻撃可能なマスは赤く表示する
 				if (moveMap[i][j] < 0) {
-					$gameScreen.tintPicture(this.getMapImgNo(i, j), [60, -60, -60, 60], 10);
+					g_designer.attackMap(i, j);
 				}
 			}
 		}
 	}
 
 	// 選択したキャラのステータスを表示する
-	this.viewStatus(x, y);
+	g_designer.charactorStatus(this._charactor[x][y]);
 	
 	// 選択キャラクターの移動マス情報を保存する
 	this._beforeMoveX = x;
@@ -570,10 +557,8 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 feh_viewBattle.prototype.moveCharactor = function(x, y) {
 	
 	// キャラクターを移動する
-	$gameScreen.movePicture(
-			this._battle.selectedCharactor.imgNo, 
-			0, x*60, y*60, 100, 100, 255, 0, 10);
-
+	g_designer.moveCharactor(this._battle.selectedCharactor, x, y);
+	
 	// 移動キャラクター情報を画面情報に設定する
 	g_gamen[this._afterMoveX][this._afterMoveY] = "moveMap";
 	g_gamen[x][y] = "moveCharactor";
@@ -595,7 +580,7 @@ feh_viewBattle.prototype.decideMove = function(x, y) {
 	}
 	
 	// キャラクターを移動済み表示にする
-	$gameScreen.tintPicture(this._charactor[x][y].imgNo, [0, 0, 0, 255], 10);
+	g_designer.decideCharactor(this._charactor[x][y]);
 	
 	// キャラクターを行動決定済みにする
 	this._charactor[x][y].decidedFlg = true;
@@ -615,30 +600,9 @@ feh_viewBattle.prototype.showBattle = function(x, y) {
 	// 戦闘情報を取得する
 	this._attackData = this._battleLogic.getBattleData(
 			this._battle.selectedCharactor.status, this._charactor[x][y].status);
-
-	// ステータス情報を非表示にする
-	this.clearInfo();
 	
 	// 戦闘情報を表示する
-	var msg = this._attackData.kougekisha.name
-				+ " - HP " + this._attackData.kougekisha.nokoriHp
-				+ "/" + this._attackData.kougekisha.hp;
-	showMessage(msg, 380, 60);
-	msg = this._attackData.hangekisha.name
-			+ " - HP " + this._attackData.hangekisha.nokoriHp
-			+ "/" + this._attackData.hangekisha.hp;
-	showMessage(msg, 380, 90);
-	for (i=0; i<this._attackData.kougekiDataArray.length; i++) {
-		msg = this._attackData.kougekiDataArray[i].kougekisha.name
-				+ " の攻撃 ";
-		showMessage(msg, 380, 130+i*70);
-		msg = "　"
-				+ this._attackData.kougekiDataArray[i].shubisha.name
-				+ " に "
-				+ this._attackData.kougekiDataArray[i].damage
-				+ " ダメージ";
-		showMessage(msg, 380, 160+i*70);
-	}
+	g_designer.attack(this._attackData);
 
 	// 戦闘表示状態を画面情報に設定する
 	g_gamen[x][y] = "selectedAttackEnemy";
@@ -653,31 +617,13 @@ feh_viewBattle.prototype.decideAttack = function(x, y) {
 	this._battleLogic.excuteAttack(this._attackData);
 	
 	// 攻撃の結果を表示する
-	this.clearInfo();
-	var msg = this._attackData.kougekisha.name
-				+ " - HP " + this._attackData.kougekisha.nokoriHp
-				+ "/" + this._attackData.kougekisha.hp;
-	showMessage(msg, 380, 60);
-	msg = this._attackData.hangekisha.name
-				+ " - HP " + this._attackData.hangekisha.nokoriHp
-				+ "/" + this._attackData.hangekisha.hp;
-	showMessage(msg, 380, 90);	
-	if (this._attackData.kougekishaShibouFlg) {
-		msg = this._attackData.kougekisha.name
-				+ " は倒れた";
-		showMessage(msg, 380, 130);
-	}
-	if (this._attackData.hangekishaShibouFlg) {
-		msg = this._attackData.hangekisha.name
-				+ " は倒れた";
-		showMessage(msg, 380, 130);
-	}
+	g_designer.attackResult(this._attackData);
 	
 	// 攻撃者が死んだ場合
 	if (this._attackData.kougekishaShibouFlg) {
 		
 		// 攻撃者を死亡状態にする
-		$gameScreen.erasePicture(this._charactor[this._beforeMoveX][this._beforeMoveY].imgNo);
+		g_designer.eraseCharactor(this._charactor[this._beforeMoveX][this._beforeMoveY]);
 		this._charactor[this._beforeMoveX][this._beforeMoveY] = undefined;
 		g_gamen[this._beforeMoveX][this._beforeMoveY] = undefined;
 		
@@ -688,7 +634,7 @@ feh_viewBattle.prototype.decideAttack = function(x, y) {
 		this.decideMove(this._afterMoveX, this._afterMoveY);
 		
 		// 守備者を死亡状態にする
-		$gameScreen.erasePicture(this._charactor[x][y].imgNo);
+		g_designer.eraseCharactor(this._charactor[x][y]);
 		this._charactor[x][y] = undefined;
 		g_gamen[x][y] = undefined;
 		
@@ -716,11 +662,11 @@ feh_viewBattle.prototype.endTurn = function() {
 		this._battle.turn = "blue";
 	}
 	
-	// キャラクター情報更新
+	// キャラクター表示を元に戻す
 	for (i=0; i<6; i++) {
 		for (j=0; j<8; j++) {
 			if (this._charactor[i][j] != undefined) {
-				$gameScreen.tintPicture(this._charactor[i][j].imgNo, [0, 0, 0, 0], 10);
+				g_designer.normalCharactor(this._charactor[i][j]);
 				this._charactor[i][j].decidedFlg = false;
 				
 				// マップ画面情報を更新する
@@ -732,38 +678,6 @@ feh_viewBattle.prototype.endTurn = function() {
 			}
 		}
 	}
-}
-
-/**
- * ステータスを表示します
- */
-feh_viewBattle.prototype.viewStatus = function(x, y) {
-	this.clearInfo();
-	var msg = this._charactor[x][y].status.name + " のステータス";
-	showMessage(msg, 380, 30);
-	msg = "　ＨＰ " + this._charactor[x][y].status.nokoriHp
-				+ "/" + this._charactor[x][y].status.hp;
-	showMessage(msg, 380, 60);
-	msg = "　攻撃 " + this._charactor[x][y].status.kougeki;
-	showMessage(msg, 380, 90);
-	msg = "　速さ " + this._charactor[x][y].status.hayasa;
-	showMessage(msg, 380, 120);
-	msg = "　防御 " + this._charactor[x][y].status.shubi;
-	showMessage(msg, 380, 150);
-	msg = "　魔防 " + this._charactor[x][y].status.mabou;
-	showMessage(msg, 380, 180);
-	msg = "　武器 " + this._charactor[x][y].status.bukiSkill;
-	showMessage(msg, 380, 210);
-	msg = "　補助 " + this._charactor[x][y].status.hojoSkill;
-	showMessage(msg, 380, 240);
-	msg = "　奥義 " + this._charactor[x][y].status.ougi;
-	showMessage(msg, 380, 270);
-	msg = "　aｽｷﾙ " + this._charactor[x][y].status.aSkill;
-	showMessage(msg, 380, 300);
-	msg = "　bｽｷﾙ " + this._charactor[x][y].status.bSkill;
-	showMessage(msg, 380, 330);
-	msg = "　cｽｷﾙ " + this._charactor[x][y].status.cSkill;
-	showMessage(msg, 380, 360);
 }
 
 /**
@@ -827,8 +741,7 @@ feh_viewBattle.prototype.unselectAttackEnemy = function() {
  * ゲーム終了処理
  */
 feh_viewBattle.prototype.endGame = function() {
-	this.clearInfo();
-	showMessage("戦闘終了！", 380, 150);
+	g_designer.endBattle();
 	g_gamenStatus = "enable";
 	setTimeout((function() {
 		SceneManager.goto(Scene_Title);
@@ -837,11 +750,10 @@ feh_viewBattle.prototype.endGame = function() {
 }
 
 
+/*******************************************************************
+ * プライベート関数　共通的な処理
+ *******************************************************************/
 
-/***********************************************************************************************************************
- * util
- *
- */
 
 /**
  * バトル画面の情報をクリアします
@@ -901,20 +813,15 @@ feh_viewBattle.prototype.isTurnEnd = function(x, y) {
 }
 
 /**
- * x,yマスの画像Noを取得します
- */
-feh_viewBattle.prototype.getMapImgNo = function(x, y) {
-	return (1 + parseInt(x) + (parseInt(y) * 6));
-};
-
-/**
  * 移動マップを非表示にして
  * 画面情報からも削除します
  */
 feh_viewBattle.prototype.clearMoveMap = function() {
-	for (i=1; i<49; i++) {
-		$gameScreen.tintPicture(i, [0, 0, 0, 0], 10);
-	}
+	
+	// 移動範囲を非表示にする
+	g_designer.clearMap();
+	
+	// 移動範囲情報を画面情報から削除する
 	for (i=0; i<6; i++) {
 		for (j=0; j<8; j++) {
 			if (g_gamen[i][j] == "moveMap") {
@@ -944,14 +851,5 @@ feh_viewBattle.prototype.isGameEnd = function() {
 	}
 	return (blue == 0 || red == 0);
 }
-
-/**
- * 情報画面をクリアする
- */
-feh_viewBattle.prototype.clearInfo = function() {
-	$gameScreen.erasePicture(50);
-	clearMessage();
-}
-
 
 

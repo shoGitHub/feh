@@ -1,18 +1,25 @@
 
 /**
- * テスト用関数
- * @returns
+ * feh_battleLogic
+ * 
+ * シミュレーションゲームのロジックを実装するクラスです。
+ * 主にキャラクターのステータスに関係する以下の処理を保持します。
+ * 
+ * ・戦闘処理
+ * ・キャラクターの移動範囲の算出
+ * ・キャラクターの攻撃範囲の算出
+ * ・キャラクターのスキルに関する処理
+ * 
+ * 
  */
-function testFunction() {
-	var battle = getBattleData();
-	console.dir(battle);
-}
 
 
-/***********************************************************************************************************************
- * constructor
- *
- */
+
+/*******************************************************************
+ * パブリック関数
+ *******************************************************************/
+
+
 
 /**
  * コンストラクタ
@@ -25,14 +32,8 @@ feh_battleLogic.prototype = Object.create(Object.prototype);
 feh_battleLogic.prototype.constructor = feh_battleLogic;
 
 
-/***********************************************************************************************************************
- * map
- *
- */
-
 /**
- * キャラクターが指定したマスを攻撃できるマス情報を取得する
- * viewクラスから呼び出される処理。
+ * 指定したマスをキャラクターが攻撃できるマス情報を取得する
  */
 feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
 
@@ -94,8 +95,7 @@ feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
 
 
 /**
- * x,yマスのキャラクターの移動可能なマップ情報を返却する。
- * viewクラスから呼び出される処理。
+ * x,yマスのキャラクターの移動範囲を算出する
  * 
  * 
  * @return 移動可能マップ情報２次元配列。
@@ -139,81 +139,7 @@ feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 }
 
 /**
- * 移動範囲探索アルゴリズム
- */
-feh_battleLogic.prototype.searchMap = function(
-			moveMap, moveType, moveRange, x, y) {
-	
-	// 移動力０の場合、探索終了
-	if (moveRange == 0) {
-		return;
-	}
-	
-	// 上方向を探索
-	if ((y - 1) >= 0) {
-		if (this.serch(moveMap, moveType, moveRange, x, y-1)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x, y-1);
-		}
-	}
-	
-	// 右方向を探索
-	if ((x + 1) <= 5) {
-		if (this.serch(moveMap, moveType, moveRange, x+1, y)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x+1, y);
-		}
-	}
-	
-	// 下方向を探索
-	if ((y + 1) <= 7) {
-		if (this.serch(moveMap, moveType, moveRange, x, y+1)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x, y+1);
-		}
-	}
-	
-	// 左方向を探索
-	if ((x - 1) >= 0) {
-		if (this.serch(moveMap, moveType, moveRange, x-1, y)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x-1, y);
-		}
-	}	
-}
-
-/**
- * 移動範囲探索アルゴリズム
- */
-feh_battleLogic.prototype.serch = function(moveMap, moveType, moveRange, x, y) {
-	
-	// 探索済みの場合
-	if (moveMap[x][y] > 0) {
-		return false;
-	}
-	
-	// 敵キャラクターがいるマスは移動不可
-	if (g_gamen[x][y] == "enemyCharactor") {
-		return false;
-	}
-	
-	// 森地形の場合
-	if (moveMap[x][y] == -2) {
-		
-		// 騎馬は移動不可
-		if (moveType == 1) {
-			return false;
-		}
-		
-		// 重装は -1
-		if (moveType == 2) {
-			moveRange += 1;
-		}
-	}
-	
-	// 探索実行
-	moveMap[x][y] += moveRange;
-	return (moveMap[x][y] > 0);
-}
-
-/**
- * キャラクターが攻撃可能なマップ情報を取得します
+ * キャラクターの攻撃範囲を算出します
  */
 feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 
@@ -295,25 +221,7 @@ feh_battleLogic.prototype.getAttackMap = function(charactor, moveMap) {
 }
 
 /**
- * 指定したマスがマップをはみ出ていないか判定します
- * 
- */
-feh_battleLogic.prototype.isMap = function(x, y) {
-	if (x < 0 || 5 < x
-			|| y < 0 || 7 < y) {
-		return false;
-	}
-	return true;
-}
-
-/***********************************************************************************************************************
- * battle
- *
- */
-
-/**
- * バトルデータを設定する
- * @returns
+ * キャラクターが攻撃した場合の、戦闘結果を算出します
  */
 feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 
@@ -368,8 +276,8 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 }
 
 /**
- * 攻撃を実行します
- * viewクラスから呼び出される処理
+ * キャラクターの攻撃を実行して、
+ * HPなどのステータスに反映します
  */
 feh_battleLogic.prototype.excuteAttack = function(attackData) {
 
@@ -389,6 +297,106 @@ feh_battleLogic.prototype.excuteAttack = function(attackData) {
 		}	
 	}	
 }
+
+
+
+/*******************************************************************
+ * プライベート関数　マップ系統
+ *******************************************************************/
+
+
+/**
+ * 移動範囲探索アルゴリズム
+ */
+feh_battleLogic.prototype.searchMap = function(
+			moveMap, moveType, moveRange, x, y) {
+	
+	// 移動力０の場合、探索終了
+	if (moveRange == 0) {
+		return;
+	}
+	
+	// 上方向を探索
+	if ((y - 1) >= 0) {
+		if (this.serch(moveMap, moveType, moveRange, x, y-1)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x, y-1);
+		}
+	}
+	
+	// 右方向を探索
+	if ((x + 1) <= 5) {
+		if (this.serch(moveMap, moveType, moveRange, x+1, y)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x+1, y);
+		}
+	}
+	
+	// 下方向を探索
+	if ((y + 1) <= 7) {
+		if (this.serch(moveMap, moveType, moveRange, x, y+1)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x, y+1);
+		}
+	}
+	
+	// 左方向を探索
+	if ((x - 1) >= 0) {
+		if (this.serch(moveMap, moveType, moveRange, x-1, y)) {
+			this.searchMap(moveMap, moveType, moveRange-1, x-1, y);
+		}
+	}	
+}
+/**
+ * 移動範囲探索アルゴリズム
+ */
+feh_battleLogic.prototype.serch = function(moveMap, moveType, moveRange, x, y) {
+	
+	// 探索済みの場合
+	if (moveMap[x][y] > 0) {
+		return false;
+	}
+	
+	// 敵キャラクターがいるマスは移動不可
+	if (g_gamen[x][y] == "enemyCharactor") {
+		return false;
+	}
+	
+	// 森地形の場合
+	if (moveMap[x][y] == -2) {
+		
+		// 騎馬は移動不可
+		if (moveType == 1) {
+			return false;
+		}
+		
+		// 重装は -1
+		if (moveType == 2) {
+			moveRange += 1;
+		}
+	}
+	
+	// 探索実行
+	moveMap[x][y] += moveRange;
+	return (moveMap[x][y] > 0);
+}
+
+/**
+ * 指定したマスがマップをはみ出ていないか判定します
+ * 
+ */
+feh_battleLogic.prototype.isMap = function(x, y) {
+	if (x < 0 || 5 < x
+			|| y < 0 || 7 < y) {
+		return false;
+	}
+	return true;
+}
+
+
+
+/*******************************************************************
+ * プライベート関数　戦闘系統
+ *******************************************************************/
+
+
 
 /**
  * 攻撃データを設定する
