@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<meta charset="utf-8">
+	<meta name="description" content="">
+	<meta name="author" content="">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="">
+	<link rel="shortcut icon" href="">
+	
+	<script src="https://www.gstatic.com/firebasejs/4.9.0/firebase.js"></script>
+	<script>
+	  // Initialize Firebase
+	  var config = {
+	    apiKey: "AIzaSyBgtG05DpYI427FCum8Ip8jGiufuRBwAeU",
+	    authDomain: "feh0-71099.firebaseapp.com",
+	    databaseURL: "https://feh0-71099.firebaseio.com",
+	    projectId: "feh0-71099",
+	    storageBucket: "",
+	    messagingSenderId: "763246930372"
+	  };
+	  firebase.initializeApp(config);
+		
+		// 指定したリファレンスのデータが変更されるたびにデータを取得する
+		function testGet() {
+			firebase.database().ref('test/a').on('value', function(input) {
+			  alert(input.val().username);
+			});
+		}
+		
+		// 対戦相手がいるか確認する
+		function testGetMatching() {
+			console.log("マッチング部屋を確認する");
+			firebase.database().ref('/matching').once('value').then(function(snapshot) {
+				console.log(snapshot.val().id);
+			});
+		}
+	  
+		// 空のマッチング部屋を作って、対戦相手が来るのを待ちます
+		function testCreateMatching() {
+			console.log("マッチング部屋を作る");
+			firebase.database().ref("/matching").set({
+				id: "undefined"
+			});
+			firebase.database().ref('/matching').on('value', function(snapshot) {
+				console.log("マッチング部屋の監視 id:" + snapshot.val().id);
+				
+				if (snapshot.val().id != "undefined") {
+					// 監視終了
+					firebase.database().ref('/matching').off();
+				}
+			});
+		}
+		
+		// マッチング部屋にIDを設定する
+		var newId = "testMode";
+		function testUpdateMatching() {
+			console.log("マッチング部屋に入る");
+			//var newId = (new Date()).getTime();
+			firebase.database().ref('/matching').update({
+				id: newId
+			});
+		}
+	  
+		// ゲーム部屋を作る
+		function testCreateGame() {
+			console.log("ゲーム部屋を作る");
+			
+			firebase.database().ref('/matching').once('value').then(function(snapshot) {
+				//firebase.database().ref("/game/"+snapshot.val().id).set({
+				firebase.database().ref("/game/"+newId).set({
+				    turn: "undefined"
+				});
+			});
+		}
+		
+		// マッチング部屋から退出する
+		function testLeaveMatching() {
+			console.log("マッチング部屋から出る");
+			firebase.database().ref('/matching').update({
+				id: "undefined"
+			});
+		}
+
+		// 対戦相手のターンを観戦する
+		// ※child_added は追加されたリスト要素のみを取得する
+		function testEnemyTurn() {
+			console.log("対戦相手のターンを観戦する");
+			firebase.database().ref("/game/"+newId+"/turn").on('child_added', function(snapshot) {
+				console.log("対戦相手行動しました");
+				console.dir(snapshot.val());
+			});
+		}
+
+		// 行動情報を送信する
+		function testPushAction() {
+			console.log("行動情報を送信する");
+			firebase.database().ref("/game/"+newId+"/turn").push({
+				beforeX: "beforeX",
+				beforeY: "beforeY",
+				afterX: "afterX",
+				afterY: "afterY",
+				attackX: "attackX",
+				attackY: "attackY"
+			});
+		}
+		
+		// ターンエンド情報を送信する
+		function testPushTurnend() {
+			console.log("ターンエンド情報を送信する");
+			firebase.database().ref("/game/"+newId+"/turn").push({
+				turnend: true
+			});
+		}
+		
+		// ターン切り替えのために行動情報をクリアする
+		function testClearAction() {
+			console.log("ターン切り替えのために行動情報をクリアする");
+			firebase.database().ref("/game/"+newId+"").update({
+				turn: null
+			});
+		}
+		
+		
+		
+	</script>
+
+</head>
+<body>
+	マッチング<br>
+	<button onclick="testGetMatching();">対戦相手がいるか確認する</button><br>
+	<button onclick="testCreateMatching();">空のマッチング部屋を作って、対戦相手が来るのを待つ</button><br>
+	<button onclick="testUpdateMatching();">マッチング部屋にIDを設定する</button><br>
+	<button onclick="testCreateGame();">ゲーム部屋を作製する</button><br>
+	<button onclick="testLeaveMatching();">マッチング部屋から退出する</button><br>
+	<br>
+	ゲーム<br>
+	<button onclick="testEnemyTurn();">対戦相手の行動を待つ</button><br>
+	<button onclick="testPushAction();">行動情報を送信する</button><br>
+	<button onclick="testPushTurnend();">自ターン終了情報を送信する</button><br>
+	<button onclick="testClearAction();">ターン切り替えのために行動情報をクリアする</button><br>
+
+
+</body>
+</html>
