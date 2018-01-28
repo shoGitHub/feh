@@ -19,7 +19,7 @@
  */
 function feh_designer() {
 	
-	// キャラクターの画像No
+	// キャラクターの画像Noは50～57
 	this._charactorImgNo = 50;
 }
 
@@ -30,20 +30,13 @@ feh_designer.prototype.constructor = feh_designer;
 /**
  * 画面にメッセージを表示する
  */
-feh_designer.prototype.message = function(message, x, y) {
-	var param = new Array();
-	param.message = message;
-	param.x = x;
-	param.y = y;
-	g_messageArray.push(param);
-};
-
-/**
- * メッセージを全て消去します
- * @returns
- */
-feh_designer.prototype.clearMessage = function() {
-	g_messageArray = new Array();
+feh_designer.prototype.message = function(message, x, y, color) {
+	g_messageArray.push({
+		message: message,
+		x: x,
+		y: y,
+		color: color
+	});
 };
 
 /**
@@ -57,10 +50,18 @@ feh_designer.prototype.clearImg = function() {
 };
 
 /**
- * 情報表示をクリアします
+ * インフォメーションをクリアします
  */
 feh_designer.prototype.clearInfo = function() {
+	
+	// メッセージを削除する
 	g_messageArray = new Array();
+	
+	// インフォ画像を削除する
+	// ※インフォ画像の画像Noは61～70
+	for (var i=61; i<71; i++) {
+		$gameScreen.erasePicture(i);
+	}
 };
 
 
@@ -168,64 +169,73 @@ feh_designer.prototype.eraseCharactor = function(charactor) {
 
 
 /*******************************************************************
- * パブリック関数 情報画面
+ * パブリック関数 インフォメーション
  *******************************************************************/
 
-
+/**
+ * キャラクターのステータスを表示する
+ */
 feh_designer.prototype.charactorStatus = function(charactor) {
+	
 	// まずクリアする
 	this.clearInfo();
-	var msg = charactor.status.name + " のステータス";
-	this.message(msg, 380, 30);
-	msg = "　ＨＰ " + charactor.status.nokoriHp
-				+ "/" + charactor.status.hp;
-	this.message(msg, 380, 60);
-	msg = "　攻撃 " + charactor.status.kougeki;
+	
+	// ステータスを表示する
+	$gameScreen.showPicture(61, "sd/" + charactor.img, 0, 480, 30, 100, 100, 255, 0);
+	var msg = "　ＨＰ\n　攻撃\n　速さ\n　守備\n　魔防\n　武器\n　補助\n　奥義\n　aｽｷﾙ\n　bｽｷﾙ\n　cｽｷﾙ\n";
 	this.message(msg, 380, 90);
-	msg = "　速さ " + charactor.status.hayasa;
-	this.message(msg, 380, 120);
-	msg = "　守備 " + charactor.status.shubi;
-	this.message(msg, 380, 150);
-	msg = "　魔防 " + charactor.status.mabou;
-	this.message(msg, 380, 180);
-	msg = "　武器 " + charactor.status.bukiSkill;
-	this.message(msg, 380, 210);
-	msg = "　補助 " + charactor.status.hojoSkill;
-	this.message(msg, 380, 240);
-	msg = "　奥義 " + charactor.status.ougi;
-	this.message(msg, 380, 270);
-	msg = "　aｽｷﾙ " + charactor.status.aSkill;
-	this.message(msg, 380, 300);
-	msg = "　bｽｷﾙ " + charactor.status.bSkill;
-	this.message(msg, 380, 330);
-	msg = "　cｽｷﾙ " + charactor.status.cSkill;
-	this.message(msg, 380, 360);
+	msg = charactor.nokoriHp	+ "/" + charactor.hp + "\n"
+				+ charactor.kougeki + "\n"
+				+ charactor.hayasa + "\n"
+				+ charactor.shubi + "\n"
+				+ charactor.mabou + "\n"
+				+ charactor.bukiSkill + "\n"
+				+ charactor.hojoSkill + "\n"
+				+ charactor.ougi + "\n"
+				+ charactor.aSkill + "\n"
+				+ charactor.bSkill + "\n"
+				+ charactor.cSkill + "\n";
+	this.message(msg, 460, 90, "yellow");
 };
 
 /**
- * 攻撃情報を表示する
+ * 攻撃予想を表示する
  */
 feh_designer.prototype.attack = function(attackData) {
+	
 	// まずクリアする
 	this.clearInfo();
-	var msg = attackData.kougekisha.name
-				+ " - HP " + attackData.kougekisha.nokoriHp
-				+ "/" + attackData.kougekisha.hp;
-	this.message(msg, 380, 60);
-	msg = attackData.hangekisha.name
-			+ " - HP " + attackData.hangekisha.nokoriHp
-			+ "/" + attackData.hangekisha.hp;
-	this.message(msg, 380, 90);
-	for (i=0; i<attackData.kougekiDataArray.length; i++) {
-		msg = attackData.kougekiDataArray[i].kougekisha.name
-				+ " の攻撃 ";
-		this.message(msg, 380, 130+i*70);
-		msg = "　"
-				+ attackData.kougekiDataArray[i].shubisha.name
-				+ " に "
-				+ attackData.kougekiDataArray[i].damage
-				+ " ダメージ";
-		this.message(msg, 380, 160+i*70);
+	
+	// 攻撃予想を表示する
+	$gameScreen.showPicture(62, "sd/" + attackData.kougekisha.img, 0, 370, 140, 100, 100, 255, 0);
+	$gameScreen.showPicture(63, "sd/" + attackData.hangekisha.img, 0, 590, 210, 100, 100, 255, 0);
+	var msg = "HP\nDM";
+	this.message(msg, 430, 140);
+	this.message(msg, 475, 210);
+	msg = "   " + attackData.kougekisha.nokoriHp + " →\n   " +attackData.kougekisha.damage;
+	this.message(msg, 430, 140, "yellow");
+	msg = "         " + attackData.kougekisha.tmpHp;
+	if (attackData.kougekisha.tmpHp == 0) {
+		this.message(msg, 430, 140, "red");
+	} else {
+		this.message(msg, 430, 140, "yellow");
+	}
+	if (attackData.kougekisha.kougekiNum > 1) {
+		msg = "\n      × " + attackData.kougekisha.kougekiNum;
+		this.message(msg, 430, 140, "yellow");
+	}
+	
+	msg = "   " + attackData.hangekisha.nokoriHp + " →\n   " +attackData.hangekisha.damage;
+	this.message(msg, 475, 210, "yellow");
+	msg = "         " + attackData.hangekisha.tmpHp;
+	if (attackData.hangekisha.tmpHp == 0) {
+		this.message(msg, 475, 210, "red");
+	} else {
+		this.message(msg, 475, 210, "yellow");
+	}
+	if (attackData.hangekisha.kougekiNum > 1) {
+		msg = "\n      × " + attackData.hangekisha.kougekiNum;
+		this.message(msg, 475, 210, "yellow");
 	}
 };
 
@@ -233,23 +243,43 @@ feh_designer.prototype.attack = function(attackData) {
  * 攻撃結果を表示する
  */
 feh_designer.prototype.attackResult = function(attackData) {
+	
 	// まずクリアする
 	this.clearInfo();
-	var msg = attackData.kougekisha.name
-				+ " - HP " + attackData.kougekisha.nokoriHp
-				+ "/" + attackData.kougekisha.hp;
-	this.message(msg, 380, 60);
-	msg = attackData.hangekisha.name
-			+ " - HP " + attackData.hangekisha.nokoriHp
-			+ "/" + attackData.hangekisha.hp;
-	this.message(msg, 380, 90);	
-	if (attackData.kougekishaShibouFlg) {
-		msg = attackData.kougekisha.name + " は倒れた";
-		this.message(msg, 380, 130);
+	
+	// 攻撃予想を表示する
+	$gameScreen.showPicture(62, "sd/" + attackData.kougekisha.img, 0, 370, 140, 100, 100, 255, 0);
+	$gameScreen.showPicture(63, "sd/" + attackData.hangekisha.img, 0, 590, 210, 100, 100, 255, 0);
+	var msg = "HP\nDM";
+	this.message(msg, 430, 140);
+	this.message(msg, 475, 210);
+	
+	msg = "\n   " + attackData.kougekisha.damage;
+	this.message(msg, 430, 140, "yellow");
+	msg = "   " + attackData.kougekisha.nokoriHp;
+	if (attackData.kougekisha.nokoriHp == 0) {
+		this.message(msg, 430, 140, "red");
+		$gameScreen.tintPicture(62, [0, 0, 0, 255], 10);
+	} else {
+		this.message(msg, 430, 140, "yellow");
 	}
-	if (attackData.hangekishaShibouFlg) {
-		msg = attackData.hangekisha.name + " は倒れた";
-		this.message(msg, 380, 130);
+	if (attackData.kougekisha.kougekiNum > 1) {
+		msg = "\n      × " + attackData.kougekisha.kougekiNum;
+		this.message(msg, 430, 140, "yellow");
+	}
+	
+	msg = "\n   " + attackData.hangekisha.damage;
+	this.message(msg, 475, 210, "yellow");
+	msg = "   " + attackData.hangekisha.nokoriHp;
+	if (attackData.hangekisha.nokoriHp == 0) {
+		this.message(msg, 475, 210, "red");
+		$gameScreen.tintPicture(63, [0, 0, 0, 255], 10);
+	} else {
+		this.message(msg, 475, 210, "yellow");
+	}
+	if (attackData.hangekisha.kougekiNum > 1) {
+		msg = "\n      × " + attackData.hangekisha.kougekiNum;
+		this.message(msg, 475, 210, "yellow");
 	}
 };
 
@@ -257,7 +287,7 @@ feh_designer.prototype.attackResult = function(attackData) {
  * バトル終了
  */
 feh_designer.prototype.endBattle = function() {
-	this.clearMessage();
+	this.clearInfo();
 	this.message("戦闘終了！", 380, 150);
 };
 

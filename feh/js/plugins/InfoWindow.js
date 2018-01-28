@@ -58,12 +58,39 @@
 //		this.resetTextColor();
 //		this.drawText($gameVariables.value(2) + " 個",0,this.lineHeight());
 		for (var i=0; i<g_messageArray.length; i++) {
+			
+			// 色を設定する
+			if (g_messageArray[i].color == "yellow") {
+				this.changeTextColor(this.textColor(6));
+			} else if (g_messageArray[i].color == "red") {
+				this.changeTextColor(this.textColor(18));
+			} else {
+				this.resetFontSettings();
+			}
+			
+			// 文字を表示する
 		    this.drawTextEx(
 		    		g_messageArray[i].message, 
 		    		g_messageArray[i].x, 
 		    		g_messageArray[i].y
 		    );
 		}
+	};
+
+	Window_Info.prototype.drawTextEx = function(text, x, y) {
+	    if (text) {
+	        var textState = { index: 0, x: x, y: y, left: x };
+	        textState.text = this.convertEscapeCharacters(text);
+	        textState.height = this.calcTextHeight(textState, false);
+	        // 設定した色を反映するために、設定リセットを行わない
+//	        this.resetFontSettings();
+	        while (textState.index < textState.text.length) {
+	            this.processCharacter(textState);
+	        }
+	        return textState.x - x;
+	    } else {
+	        return 0;
+	    }
 	};
 	
 	// フォントサイズ
@@ -83,6 +110,10 @@
 	Window_Info.prototype.updateTone = function() {
 //    	this.setTone(64, 0, 128);
 		this.setTone(0, 0, 0);
+	};
+	// ラインヘイト
+	Window_Info.prototype.lineHeight = function() {
+	    return 30;
 	};
 
 	Window_Info.prototype.textPadding = function() {

@@ -40,6 +40,8 @@ function sentoshaData() {
 	bukiType		// 武器タイプ
 	idouType		// 移動タイプ
 	nokoriHp		// 残りHP
+	tmpHp			// 攻撃後HP
+	kougekiNum		// 攻撃回数
 	ougiCount		// 奥義カウント
 	hp				// HP
 	kougeki			// 攻撃

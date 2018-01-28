@@ -104,18 +104,12 @@ feh_battleLogic.prototype.getCanAttackMap = function(charactor, x, y) {
  */
 feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 	
-	/*
-	 * アルゴリズムは次のURLを参照
-	 * http://2dgames.jp/2012/05/22/%E6%88%A6%E8%A1%93slg%E3%81%AE%E4%BD%9C%E3%82%8A%E6%96%B9%EF%BC%88%E7%A7%BB%E5%8B%95%E7%AF%84%E5%9B%B2%E3%82%92%E6%B1%82%E3%82%81%E3%82%8B%EF%BC%89/
-	 */
-	
 	// 移動距離
 	var moveType = charactor.idouType;
 	var moveRange = parseInt(g_moveTypeData[charactor.idouType].moveRange);
 	
 	/*
 	 * 移動可能マップ初期化
-	 * ※x,yが反転することに注意
 	 * 　-1　→　平地
 	 * 　-2　→　森
 	 * 　 7　→　壁（移動不可地形）
@@ -124,16 +118,28 @@ feh_battleLogic.prototype.getMoveMap = function(charactor, x, y) {
 	 */
 	var moveMap = [
 			[-1, -1, -1, -1, -1, -1, -1, -1],
-			[-1, -1, -2, -1, -1, -2, -1, -1],
-			[-1, -1, -1, -1, -1, -1, -1, -1],
-			[-1, -1, -1, -1, -1, -1, -1, -1],
-			[-1, -1, -2, -1, -1, -2, -1, -1],
+			[-1, -1, -9, -1, -2, -2, -1, -1],
+			[-1, -1, -9, -1, -1, -1, -1, -2],
+			[-2, -1, -1, -1, -1, -9, -1, -1],
+			[-1, -1, -2, -2, -1, -9, -1, -1],
 			[-1, -1, -1, -1, -1, -1, -1, -1],
 	];
 	moveMap[x][y] = moveRange;
 	
 	// 移動可能マップ探索
-	this.searchMap(moveMap, moveType, moveRange, x, y);
+	for (k=0; k<moveRange; k++) {
+		for (i=0; i<6; i++) {
+			for (j=0; j<8; j++) {
+				if (moveMap[i][j] > 0) {
+					this.searchMap(moveMap, moveType, i, j);
+				}
+			}
+		}
+	}
+	
+	// デバッグログ
+	console.log("■movemap");
+	console.dir(moveMap);
 	
 	return moveMap;
 }
@@ -242,13 +248,17 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 	battle.kougekishaShibouFlg = false;
 	battle.hangekishaShibouFlg = false;
 	kougekisha.tmpHp = kougekisha.nokoriHp;
+	kougekisha.kougekiNum = 0;
+	kougekisha.damage = 0;
 	hangekisha.tmpHp = hangekisha.nokoriHp;
+	hangekisha.kougekiNum = 0;
+	hangekisha.damage = 0;
 	var isEnd = false;
 	for (i = 0; i < battle.kougekiJunArray.length; i++) {
 		
 		var kougeki;
 		if (battle.kougekiJunArray[i] == kougekisha.shozokuTeam) {
-			kougeki = this.setKougekiData(kougekisha, hangekisha);
+			kougeki = this.setKougekiData(kougekisha, hangekisha, isEnd);
 			battle.kougekiDataArray.push(kougeki);
 
 			// 死亡した場合、バトル終了
@@ -257,7 +267,7 @@ feh_battleLogic.prototype.getBattleData = function(kougekisha, hangekisha) {
 				battle.hangekishaShibouFlg = true;
 			}
 		} else {
-			kougeki = this.setKougekiData(hangekisha, kougekisha);
+			kougeki = this.setKougekiData(hangekisha, kougekisha, isEnd);
 			battle.kougekiDataArray.push(kougeki);
 
 			// 死亡した場合、バトル終了
@@ -308,55 +318,42 @@ feh_battleLogic.prototype.excuteAttack = function(attackData) {
 /**
  * 移動範囲探索アルゴリズム
  */
-feh_battleLogic.prototype.searchMap = function(
-			moveMap, moveType, moveRange, x, y) {
-	
-	// 移動力０の場合、探索終了
-	if (moveRange == 0) {
-		return;
-	}
+feh_battleLogic.prototype.searchMap = function(moveMap, moveType, x, y) {
 	
 	// 上方向を探索
 	if ((y - 1) >= 0) {
-		if (this.serch(moveMap, moveType, moveRange, x, y-1)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x, y-1);
-		}
+		this.serch(moveMap, moveType, moveMap[x][y], x, y-1);
 	}
 	
 	// 右方向を探索
 	if ((x + 1) <= 5) {
-		if (this.serch(moveMap, moveType, moveRange, x+1, y)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x+1, y);
-		}
+		this.serch(moveMap, moveType, moveMap[x][y], x+1, y);
 	}
 	
 	// 下方向を探索
 	if ((y + 1) <= 7) {
-		if (this.serch(moveMap, moveType, moveRange, x, y+1)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x, y+1);
-		}
+		this.serch(moveMap, moveType, moveMap[x][y], x, y+1);
 	}
 	
 	// 左方向を探索
 	if ((x - 1) >= 0) {
-		if (this.serch(moveMap, moveType, moveRange, x-1, y)) {
-			this.searchMap(moveMap, moveType, moveRange-1, x-1, y);
-		}
+		this.serch(moveMap, moveType, moveMap[x][y], x-1, y);
 	}	
 }
+
 /**
  * 移動範囲探索アルゴリズム
  */
 feh_battleLogic.prototype.serch = function(moveMap, moveType, moveRange, x, y) {
 	
 	// 探索済みの場合
-	if (moveMap[x][y] > 0) {
-		return false;
+	if (moveMap[x][y] >= 0) {
+		return ;
 	}
 	
 	// 敵キャラクターがいるマスは移動不可
 	if (g_gamen[x][y] == "enemyCharactor") {
-		return false;
+		return ;
 	}
 	
 	// 森地形の場合
@@ -364,19 +361,21 @@ feh_battleLogic.prototype.serch = function(moveMap, moveType, moveRange, x, y) {
 		
 		// 騎馬は移動不可
 		if (moveType == 1) {
-			return false;
+			return ;
 		}
 		
-		// 重装は -1
+		// 重装は平地と同じ扱いにする
 		if (moveType == 2) {
-			moveRange += 1;
+			moveMap[x][y] = -1;
 		}
 	}
 	
 	// 探索実行
-	moveMap[x][y] += moveRange;
-	return (moveMap[x][y] > 0);
+	if ((moveMap[x][y] + moveRange) >= 0) {
+		moveMap[x][y] += moveRange;
+	}
 }
+
 
 /**
  * 指定したマスがマップをはみ出ていないか判定します
@@ -406,20 +405,25 @@ feh_battleLogic.prototype.isMap = function(x, y) {
  * @returns
  */
 feh_battleLogic.prototype.setKougekiData = 
-	function(kougekisha, shubisha, kougekiJunArray) {
+	function(kougekisha, shubisha, isEnd) {
 
 	var kougeki = new kougekiData();
 
-	kougeki.kougekisha = kougekisha;	// 攻撃者
-	kougeki.shubisha = shubisha;	// 攻撃者
-	kougeki.damage = this.culcDamage(kougekisha, shubisha);	// ダメージ
-	kougeki.kougekishaOugiHendou = -1;						// 攻撃者奥義変動値
-	kougeki.shubishaoOgiHendou = -1;						// 守備者奥義変動値
-	kougeki.kougekishaOugiFlg = false;				// 攻撃者奥義有無
-	kougeki.shubishaOugiFlg = false;					// 守備者奥義有無
-	shubisha.tmpHp -= kougeki.damage;
-	if (shubisha.tmpHp <= 0) {			// 守備者死亡判定
+	kougeki.kougekisha = kougekisha;
+	kougeki.shubisha = shubisha;
+	kougeki.damage = this.culcDamage(kougekisha, shubisha);
+	kougeki.kougekishaOugiHendou = -1;
+	kougeki.shubishaoOgiHendou = -1;
+	kougeki.kougekishaOugiFlg = false;
+	kougeki.shubishaOugiFlg = false;
+	kougekisha.damage = kougeki.damage;
+	kougekisha.kougekiNum += 1;
+	if (!isEnd) {
+		shubisha.tmpHp -= kougeki.damage;
+	}
+	if (shubisha.tmpHp <= 0) {
 		kougeki.shubishaShibouFlg = true;
+		shubisha.tmpHp = 0;
 	} else {
 		kougeki.shubishaShibouFlg = false;
 	}
@@ -438,17 +442,21 @@ feh_battleLogic.prototype.setKougekiJun = function(kougekisha, hangekisha) {
 	
 	var kougekiJun = [];
 	
+	// 攻撃者の攻撃
 	kougekiJun.push(kougekisha.shozokuTeam);
 	
+	// 反撃者の反撃
 	if (this.canHangeki(kougekisha, hangekisha)) {
 		kougekiJun.push(hangekisha.shozokuTeam);
 	}
 	
+	// 攻撃者の追撃
 	if (this.canTsuigeki(kougekisha, hangekisha)) {
 		kougekiJun.push(kougekisha.shozokuTeam);		
 	}
 
-	if (this.canTsuigeki(hangekisha, kougekisha)) {
+	// 反撃者の追撃
+	if (this.canHangeki(kougekisha, hangekisha) && this.canTsuigeki(hangekisha, kougekisha)) {
 		kougekiJun.push(hangekisha.shozokuTeam);	
 	}
 	

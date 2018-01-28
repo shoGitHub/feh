@@ -241,10 +241,10 @@ feh_viewBattle.prototype.initData = function() {
 		} else {
 			charactor.team = "red";
 		}
-		var x = 1 + (i % 4);
-		var y = 0;
+		var x = 0;
+		var y = 2 + (i % 4);
 		if (i > 3) {
-			y = 7;
+			x = 5;
 		}
 		this._charactor[x][y] = charactor;
 	}
@@ -384,7 +384,7 @@ feh_viewBattle.prototype.excute5 = function(x, y) {
 feh_viewBattle.prototype.excute6 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
-	g_designer.charactorStatus(this._charactor[x][y]);
+	g_designer.charactorStatus(this._charactor[x][y].status);
 	
 	// 攻撃対象選択状態をキャンセルする
 	this.unselectAttackEnemy();
@@ -437,7 +437,7 @@ feh_viewBattle.prototype.excute9 = function(x, y) {
 feh_viewBattle.prototype.excute10 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
-	g_designer.charactorStatus(this._charactor[this._beforeMoveX][this._beforeMoveY]);
+	g_designer.charactorStatus(this._charactor[this._beforeMoveX][this._beforeMoveY].status);
 	
 	// 攻撃対象選択状態をキャンセルする
 	this.unselectAttackEnemy();
@@ -452,7 +452,7 @@ feh_viewBattle.prototype.excute10 = function(x, y) {
 feh_viewBattle.prototype.excute11 = function(x, y) {
 	
 	// クリックしたキャラクターのステータスを表示する
-	g_designer.charactorStatus(this._charactor[x][y]);
+	g_designer.charactorStatus(this._charactor[x][y].status);
 	
 	// 画面ステータス設定
 	g_gamenStatus = "none";
@@ -538,7 +538,7 @@ feh_viewBattle.prototype.selectCharactor = function(x, y) {
 	}
 
 	// 選択したキャラのステータスを表示する
-	g_designer.charactorStatus(this._charactor[x][y]);
+	g_designer.charactorStatus(this._charactor[x][y].status);
 	
 	// 選択キャラクターの移動マス情報を保存する
 	this._beforeMoveX = x;

@@ -116,7 +116,7 @@ function fehInit() {
 		g_sentoshaData[7].shozokuTeam = "red";
 		g_startBattleFlg = true;
 		g_gamenStatus = undefined;
-		g_designer.clearMessage();
+		g_designer.clearInfo();
 		g_designer.clearImg();
 		clearGamen();
 		g_viewBattle = new feh_viewBattle();
@@ -217,3 +217,39 @@ function initData() {
 	}
 }
 
+
+(function () {
+    var timeouts = [],
+        messageName = 'zero-timeout-message';
+
+    function setZeroTimeoutPostMessage(fn) {
+        timeouts.push(fn);
+        window.postMessage(messageName, '*');
+    }
+
+    function setZeroTimeout(fn) {
+        setTimeout(fn, 0);
+    }
+
+    function handleMessage(event) {
+        if (event.source == window && event.data == messageName) {
+            if (event.stopPropagation) {
+                event.stopPropagation();
+            }
+            if (timeouts.length) {
+                timeouts.shift()();
+            }
+        }
+    }
+
+    if (window.postMessage) {
+        if (window.addEventListener) {
+            window.addEventListener('message', handleMessage, true);
+        } else if (window.attachEvent) {
+            window.attachEvent('onmessage', handleMessage);
+        }
+        window.setZeroTimeout = setZeroTimeoutPostMessage;
+    } else {
+        window.setZeroTimeout = setZeroTimeout;
+    }
+}());

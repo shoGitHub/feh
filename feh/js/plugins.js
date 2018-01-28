@@ -11,5 +11,6 @@ var $plugins =
 {"name":"feh_battleLogic","status":true,"description":"","parameters":{}},
 {"name":"feh_view","status":true,"description":"","parameters":{}},
 {"name":"feh_viewSelect","status":true,"description":"","parameters":{}},
-{"name":"feh_viewBattle","status":true,"description":"","parameters":{}}
+{"name":"feh_viewBattle","status":true,"description":"","parameters":{}},
+{"name":"feh_designer","status":true,"description":"","parameters":{}}
 ];
